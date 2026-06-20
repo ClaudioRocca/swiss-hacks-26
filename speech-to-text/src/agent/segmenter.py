@@ -18,7 +18,36 @@ from typing import Awaitable, Callable, List, Optional
 
 from openai import AsyncOpenAI
 
-JUDGE_MODEL = os.getenv("AGENT_MODEL", "gpt-4o-mini")
+# Two LLM jobs, two models:
+#   - boundary judge: runs PER UTTERANCE -> latency-sensitive -> small/fast model.
+#   - extractor: runs PER CONCEPT -> quality-sensitive (intent, ticker mapping,
+#     structured plan) -> a stronger model.
+# AGENT_MODEL stays the back-compat knob for the extractor; each job can also be
+# pinned independently via AGENT_JUDGE_MODEL / AGENT_EXTRACT_MODEL.
+JUDGE_MODEL = os.getenv("AGENT_JUDGE_MODEL") or "gpt-4.1-mini"
+EXTRACT_MODEL = (
+    os.getenv("AGENT_EXTRACT_MODEL") or os.getenv("AGENT_MODEL") or "gpt-4.1"
+)
+
+# Spoken company name -> the ticker symbol actually stored in the data layer.
+# The DB uses SIX Swiss Exchange tickers (UBSG, NOVN, ROG…), NOT the US/ADR or
+# generic forms a model defaults to (UBS, NVS…). Inject this so the extractor
+# grounds tickers in OUR data, not its priors.
+TICKER_MAP = {
+    "Nestlé": "NESN", "Nestle": "NESN",
+    "Novartis": "NOVN",
+    "Roche": "ROG",
+    "UBS": "UBSG",
+    "Credit Suisse": "CSGN",
+    "Zurich Insurance": "ZURN", "Zurich Insurance Group": "ZURN",
+    "Swiss Re": "SREN",
+    "ABB": "ABBN",
+    "Givaudan": "GIVN",
+    "Apple": "AAPL",
+    "Microsoft": "MSFT",
+    "ASML": "ASML",
+}
+_TICKER_MAP_HINT = ", ".join(f"{k} -> {v}" for k, v in TICKER_MAP.items())
 
 
 @dataclass
@@ -209,12 +238,14 @@ class ConceptSegmenter:
         self,
         on_trigger: TriggerCb,
         *,
-        model: str = JUDGE_MODEL,
+        judge_model: str = JUDGE_MODEL,
+        extract_model: str = EXTRACT_MODEL,
         seed: int = DEFAULT_SEED,
         now: "date | None" = None,
     ):
         self.on_trigger = on_trigger
-        self.model = model
+        self.judge_model = judge_model      # per-utterance boundary judge (fast)
+        self.extract_model = extract_model  # per-concept extractor (strong)
         self.seed = seed
         # date the extractor resolves spoken/relative dates against (default today);
         # pin it in tests for reproducible since/until filters.
@@ -274,7 +305,7 @@ class ConceptSegmenter:
 
     async def _is_new_topic(self, current: str, recent: str, candidate: str) -> bool:
         resp = await self.client.chat.completions.create(
-            model=self.model,
+            model=self.judge_model,
             temperature=0,
             seed=self.seed,
             response_format={
@@ -347,7 +378,7 @@ class ConceptSegmenter:
 
     async def _extract_once(self, text: str) -> tuple[ConceptChunk, bool]:
         resp = await self.client.chat.completions.create(
-            model=self.model,
+            model=self.extract_model,
             temperature=0,
             seed=self.seed,
             max_tokens=4096,
@@ -387,13 +418,21 @@ class ConceptSegmenter:
                         "since, sector\n"
                         "  - news: news_query (required), top_k, category, ticker\n"
                         "Only set filters relevant to each chosen source; leave the rest "
-                        "null. Map spoken references to concrete values (company name -> "
-                        "ticker, e.g. 'Nestle' -> NESN). When the client wants everything "
-                        "in a category (e.g. 'show me all my properties', 'my whole "
-                        "portfolio'), set that filter to 'all' to return every row. Use "
-                        "multiple sources when useful. Leave data_requests empty if no "
-                        "lookup is needed. If is_relevant is false, data_requests must be "
-                        "empty."
+                        "null.\n"
+                        "TICKERS: the data layer stores SIX Swiss Exchange tickers. You "
+                        "MUST map every company to its EXACT ticker below — never use US/"
+                        "ADR or generic forms (e.g. 'UBS' and 'NVS' are WRONG; use 'UBSG', "
+                        f"'NOVN'). Mapping: {_TICKER_MAP_HINT}. If a company is not in "
+                        "this list, leave ticker null rather than guessing.\n"
+                        "NEWS: keep news searches loose. Put the topic in news_query and "
+                        "set ticker when a specific company is named. Leave category NULL "
+                        "unless the client explicitly asks for one kind of news — a wrong "
+                        "category silently drops valid hits. Prefer a top_k of about 5.\n"
+                        "When the client wants everything in a category (e.g. 'show me all "
+                        "my properties', 'my whole portfolio'), set that filter to 'all' "
+                        "to return every row. Use multiple sources when useful. Leave "
+                        "data_requests empty if no lookup is needed. If is_relevant is "
+                        "false, data_requests must be empty."
                     ),
                 },
                 {"role": "user", "content": text},

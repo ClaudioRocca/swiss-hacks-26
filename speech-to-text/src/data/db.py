@@ -367,19 +367,17 @@ def search_news(
     except Exception as e:
         raise DataLayerError(f"Embedding generation failed: {e}")
 
-    # Build metadata filters for ChromaDB
-    where_clause = None
-    if category is not None and ticker is not None:
-        where_clause = {
-            "$and": [
-                {"category": category},
-                {"tickers_mentioned": {"$contains": ticker}},
-            ]
-        }
-    elif category is not None:
-        where_clause = {"category": category}
-    elif ticker is not None:
-        where_clause = {"tickers_mentioned": {"$contains": ticker}}
+    # Build metadata filters for ChromaDB.
+    # NOTE: `category` is an exact-match field -> safe in a ChromaDB `where`.
+    # `ticker` is a substring of a comma-joined `tickers_mentioned` string;
+    # ChromaDB metadata filters do NOT support substring matching ($contains is
+    # a *document* operator, not a metadata one), so a where-clause on it silently
+    # matches nothing. We post-filter ticker in Python instead.
+    where_clause = {"category": category} if category is not None else None
+
+    # When ticker-filtering in Python, over-fetch candidates so post-filtering
+    # still has enough to return up to top_k matches.
+    n_results = top_k if ticker is None else min(50, max(top_k * 5, 20))
 
     # Query ChromaDB
     try:
@@ -387,7 +385,7 @@ def search_news(
 
         query_params = {
             "query_embeddings": [query_embedding],
-            "n_results": top_k,
+            "n_results": n_results,
             "include": ["documents", "metadatas", "distances"],
         }
         if where_clause is not None:
@@ -401,6 +399,7 @@ def search_news(
 
     # Process results - ChromaDB returns cosine distance, convert to similarity
     # Cosine distance = 1 - cosine_similarity, so similarity = 1 - distance
+    ticker_lc = ticker.strip().lower() if isinstance(ticker, str) and ticker.strip() else None
     output = []
     if results and results["documents"] and results["documents"][0]:
         documents = results["documents"][0]
@@ -410,16 +409,26 @@ def search_news(
         for doc, metadata, distance in zip(documents, metadatas, distances):
             similarity_score = 1.0 - distance
             # Filter out results below cosine similarity threshold
-            if similarity_score >= _SIMILARITY_THRESHOLD:
-                output.append({
-                    "document": doc,
-                    "metadata": {
-                        "source": metadata.get("source", ""),
-                        "category": metadata.get("category", ""),
-                        "published_date": metadata.get("published_date", ""),
-                        "tickers_mentioned": metadata.get("tickers_mentioned", ""),
-                    },
-                    "similarity_score": round(similarity_score, 4),
-                })
+            if similarity_score < _SIMILARITY_THRESHOLD:
+                continue
+            # Post-filter by ticker: substring match against the comma-joined
+            # tickers_mentioned (e.g. "UBSG,CSGN"), case-insensitive.
+            if ticker_lc is not None:
+                mentioned = str(metadata.get("tickers_mentioned", "")).lower()
+                tokens = {t.strip() for t in mentioned.split(",") if t.strip()}
+                if ticker_lc not in tokens:
+                    continue
+            output.append({
+                "document": doc,
+                "metadata": {
+                    "source": metadata.get("source", ""),
+                    "category": metadata.get("category", ""),
+                    "published_date": metadata.get("published_date", ""),
+                    "tickers_mentioned": metadata.get("tickers_mentioned", ""),
+                },
+                "similarity_score": round(similarity_score, 4),
+            })
+            if len(output) >= top_k:
+                break
 
     return output
