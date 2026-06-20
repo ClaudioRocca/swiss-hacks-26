@@ -144,7 +144,7 @@ def _execute_query(source: str, planned_filters: dict) -> dict:
 # WebSocket pipeline
 # ---------------------------------------------------------------------------
 
-DEFAULT_TEXT_FILE = "client_calls/call_7_two_way.txt"
+DEFAULT_TEXT_FILE = "client_calls/call_8_demo_readback.txt"
 
 # The mock data layer is anchored to late May 2025 (latest trade 2025-05-20,
 # market movements 2025-05-26, news up to 2025-05-23). Pin the agent's "today"

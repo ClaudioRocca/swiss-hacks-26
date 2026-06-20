@@ -12,11 +12,14 @@ const TICKER_MAP: Record<string, string> = {
   "NOVN.SW": "SIX:NOVN",
   "UBSG": "SIX:UBSG",
   "UBSG.SW": "SIX:UBSG",
+  "ROP": "SIX:ROG",   // Roche (our data layer uses ROP); SIX:ROG on TradingView
+  "ROG": "SIX:ROG",
   "ZURN": "SIX:ZURN",
   "ABBN": "SIX:ABBN",
   "SREN": "SIX:SREN",
   "LONN": "SIX:LONN",
   "GIVN": "SIX:GIVN",
+  "ASML": "EURONEXT:ASML",
   // US stocks
   "AAPL": "NASDAQ:AAPL",
   "MSFT": "NASDAQ:MSFT",
@@ -53,6 +56,8 @@ const ENTITY_NAME_MAP: Record<string, string> = {
   "nestlé": "SIX:NESN",
   "nestle": "SIX:NESN",
   "novartis": "SIX:NOVN",
+  "roche": "SIX:ROG",
+  "asml": "EURONEXT:ASML",
   "ubs": "SIX:UBSG",
   "zurich insurance": "SIX:ZURN",
   "abb": "SIX:ABBN",
@@ -96,9 +101,8 @@ export function resolveToTradingViewSymbol(raw: string): string | null {
   // If it already looks like EXCHANGE:SYMBOL, pass through
   if (/^[A-Z]+:[A-Z0-9.]+$/.test(upper)) return upper;
 
-  // If it looks like a raw ticker (2-5 uppercase letters), try it directly
-  if (/^[A-Z]{2,5}$/.test(upper)) return upper;
-
+  // Otherwise unresolvable — do NOT guess. A free-text entity like "ROCHE" or
+  // "TODAY" must not be passed through as a fake ticker (it 404s the chart).
   return null;
 }
 

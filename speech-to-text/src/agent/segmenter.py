@@ -31,13 +31,13 @@ EXTRACT_MODEL = (
 )
 
 # Spoken company name -> the ticker symbol actually stored in the data layer.
-# The DB uses SIX Swiss Exchange tickers (UBSG, NOVN, ROG…), NOT the US/ADR or
+# The DB uses SIX Swiss Exchange tickers (UBSG, NOVN, ROP…), NOT the US/ADR or
 # generic forms a model defaults to (UBS, NVS…). Inject this so the extractor
 # grounds tickers in OUR data, not its priors.
 TICKER_MAP = {
     "Nestlé": "NESN", "Nestle": "NESN",
     "Novartis": "NOVN",
-    "Roche": "ROG",
+    "Roche": "ROP",
     "UBS": "UBSG",
     "Credit Suisse": "CSGN",
     "Zurich Insurance": "ZURN", "Zurich Insurance Group": "ZURN",
@@ -300,9 +300,15 @@ class ConceptSegmenter:
             self._buffer.append((speaker, utterance, idx))
             return
 
-        candidate = f"{self._label(speaker)}: {utterance}"
-        if await self._is_new_topic(self.current_text, self.recent_text, candidate):
+        # Eager flush: the client just finished and the RM is now responding.
+        # Emit the concept now so the widget appears as the RM starts addressing
+        # it — the RM's data read-back then streams underneath the live widget.
+        if speaker == "rm" and self._buffer[-1][0] == "client":
             await self._flush()
+        else:
+            candidate = f"{self._label(speaker)}: {utterance}"
+            if await self._is_new_topic(self.current_text, self.recent_text, candidate):
+                await self._flush()
 
         self._buffer.append((speaker, utterance, idx))
 
@@ -321,6 +327,11 @@ class ConceptSegmenter:
         entries = self._pending + self._buffer
         self._buffer = []
         if not entries:
+            return
+        # An RM-only segment (greeting, or the RM reading data back to the
+        # client) carries no client request -> no widget.
+        if not any(sp == "client" for sp, _, _ in entries):
+            self._pending = []
             return
         text = self._format(entries)
         if not text:

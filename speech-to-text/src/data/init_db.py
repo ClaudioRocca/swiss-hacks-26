@@ -54,7 +54,7 @@ CUSTOMER_PROFILE = {
 PORTFOLIO_POSITIONS = [
     {"ticker": "NESN", "quantity": 1200, "purchase_price": 98.50, "current_price": 107.80, "currency": "CHF", "sector": "consumer staples"},
     {"ticker": "NOVN", "quantity": 800, "purchase_price": 82.30, "current_price": 91.45, "currency": "CHF", "sector": "healthcare"},
-    {"ticker": "ROG", "quantity": 350, "purchase_price": 245.60, "current_price": 258.90, "currency": "CHF", "sector": "healthcare"},
+    {"ticker": "ROP", "quantity": 350, "purchase_price": 245.60, "current_price": 258.90, "currency": "CHF", "sector": "healthcare"},
     {"ticker": "UBSG", "quantity": 2000, "purchase_price": 24.80, "current_price": 28.35, "currency": "CHF", "sector": "financials"},
     {"ticker": "ZURN", "quantity": 600, "purchase_price": 450.20, "current_price": 478.60, "currency": "CHF", "sector": "insurance"},
     {"ticker": "AAPL", "quantity": 500, "purchase_price": 142.50, "current_price": 198.30, "currency": "USD", "sector": "technology"},
@@ -114,7 +114,7 @@ TRADE_OPERATIONS = [
     {"ticker": "NESN", "quantity": 200, "value": 21560.00, "operation_type": "buy", "timestamp": "2025-05-20T09:15:00Z"},
     {"ticker": "UBSG", "quantity": 500, "value": 14175.00, "operation_type": "buy", "timestamp": "2025-05-19T10:30:00Z"},
     {"ticker": "AAPL", "quantity": 100, "value": 19830.00, "operation_type": "sell", "timestamp": "2025-05-18T14:45:00Z"},
-    {"ticker": "ROG", "quantity": 50, "value": 12945.00, "operation_type": "buy", "timestamp": "2025-05-17T11:00:00Z"},
+    {"ticker": "ROP", "quantity": 50, "value": 12945.00, "operation_type": "buy", "timestamp": "2025-05-17T11:00:00Z"},
     {"ticker": "NOVN", "quantity": 200, "value": 18290.00, "operation_type": "buy", "timestamp": "2025-05-16T09:45:00Z"},
     {"ticker": "MSFT", "quantity": 50, "value": 21525.00, "operation_type": "sell", "timestamp": "2025-05-15T15:30:00Z"},
     {"ticker": "ASML", "quantity": 30, "value": 19356.00, "operation_type": "buy", "timestamp": "2025-05-14T10:15:00Z"},
@@ -128,7 +128,7 @@ TRADE_OPERATIONS = [
 MARKET_MOVEMENTS = [
     {"ticker": "NESN", "company_name": "Nestle SA", "sector": "consumer staples", "price_change": 2.30, "percentage_change": 2.18, "current_price": 107.80, "volume": 4520000, "timestamp": "2025-05-26T16:30:00Z"},
     {"ticker": "NOVN", "company_name": "Novartis AG", "sector": "healthcare", "price_change": -1.55, "percentage_change": -1.67, "current_price": 91.45, "volume": 3870000, "timestamp": "2025-05-26T16:30:00Z"},
-    {"ticker": "RO", "company_name": "Roche Holding AG", "sector": "healthcare", "price_change": 3.80, "percentage_change": 1.49, "current_price": 258.90, "volume": 1950000, "timestamp": "2025-05-26T16:30:00Z"},
+    {"ticker": "ROP", "company_name": "Roche Holding AG", "sector": "healthcare", "price_change": 3.80, "percentage_change": 1.49, "current_price": 258.90, "volume": 1950000, "timestamp": "2025-05-26T16:30:00Z"},
     {"ticker": "UBSG", "company_name": "UBS Group AG", "sector": "financials", "price_change": 0.45, "percentage_change": 1.61, "current_price": 28.35, "volume": 8200000, "timestamp": "2025-05-26T16:30:00Z"},
     {"ticker": "ZURN", "company_name": "Zurich Insurance Group", "sector": "insurance", "price_change": -5.40, "percentage_change": -1.12, "current_price": 478.60, "volume": 980000, "timestamp": "2025-05-26T16:30:00Z"},
     {"ticker": "AAPL", "company_name": "Apple Inc.", "sector": "technology", "price_change": 4.20, "percentage_change": 2.16, "current_price": 198.30, "volume": 52000000, "timestamp": "2025-05-26T20:00:00Z"},
@@ -183,7 +183,7 @@ NEWS_ARTICLES = [
     },
     {
         "text": "Roche's new Alzheimer's drug receives FDA breakthrough therapy designation. Phase 3 trial data showed 35% reduction in cognitive decline. The Basel company's shares surged 4% on the news, outperforming the broader SPI index.",
-        "metadata": {"source": "Financial Times", "category": "equity", "published_date": "2025-05-16", "tickers_mentioned": "ROG"},
+        "metadata": {"source": "Financial Times", "category": "equity", "published_date": "2025-05-16", "tickers_mentioned": "ROP"},
     },
     {
         "text": "Swiss ESG funds see record inflows of CHF 8 billion in Q1 2025. Sustainable investing now represents 42% of total Swiss fund assets under management. Technology and healthcare remain the most popular ESG-screened sectors.",

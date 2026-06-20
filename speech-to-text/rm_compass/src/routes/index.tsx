@@ -229,13 +229,21 @@ function TradesResults({ results }: { results: unknown }) {
 function CustomerProfileResults({ results }: { results: unknown }) {
   const data = results as Record<string, unknown> | null;
   if (!data || Object.keys(data).length === 0) return <EmptyResults />;
-  const display = ["full_name", "risk_profile", "aum_chf", "residency", "relationship_since"];
+  // Map real data-layer fields -> display label + optional formatter.
+  const fields: Array<[string, string, ((v: unknown) => string)?]> = [
+    ["name", "Client"],
+    ["risk_appetite", "Risk appetite"],
+    ["investment_horizon", "Horizon", (v) => String(v).replace(/_/g, " ")],
+    ["total_aum", "Total AUM", (v) => `CHF ${Number(v).toLocaleString()}`],
+    ["preferred_sectors", "Preferred sectors", (v) => String(v).replace(/,/g, ", ")],
+    ["kyc_status", "KYC"],
+  ];
   return (
     <div className="space-y-2 text-sm">
-      {display.filter((k) => data[k] != null).map((k) => (
+      {fields.filter(([k]) => data[k] != null).map(([k, label, fmt]) => (
         <div key={k} className="flex items-baseline justify-between border-b pb-2 last:border-0 last:pb-0" style={{ borderColor: "#F1ECE0" }}>
-          <span className="text-[11px] uppercase tracking-wider" style={{ color: "#6B7280" }}>{k.replace(/_/g, " ")}</span>
-          <span className="font-medium" style={{ color: TEXT }}>{String(data[k])}</span>
+          <span className="text-[11px] uppercase tracking-wider" style={{ color: "#6B7280" }}>{label}</span>
+          <span className="font-medium" style={{ color: TEXT }}>{fmt ? fmt(data[k]) : String(data[k])}</span>
         </div>
       ))}
     </div>
