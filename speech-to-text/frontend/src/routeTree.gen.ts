@@ -8,12 +8,12 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as ProposalsRouteImport } from './routes/proposals'
-import { Route as PostCallRouteImport } from './routes/post-call'
-import { Route as ClientRouteImport } from './routes/client'
-import { Route as CallsTodayRouteImport } from './routes/calls-today'
-import { Route as ActionItemsRouteImport } from './routes/action-items'
+import { Route as rootRouteImport } from './routes/__root.tsx'
+import { Route as ProposalsRouteImport } from './routes/proposals.tsx'
+import { Route as PostCallRouteImport } from './routes/post-call.tsx'
+import { Route as ClientRouteImport } from './routes/client.tsx'
+import { Route as CallsTodayRouteImport } from './routes/calls-today.tsx'
+import { Route as ActionItemsRouteImport } from './routes/action-items.tsx'
 import { Route as IndexRouteImport } from './routes/index'
 
 const ProposalsRoute = ProposalsRouteImport.update({
@@ -75,28 +75,28 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
-    | '/action-items'
-    | '/calls-today'
-    | '/client'
-    | '/post-call'
-    | '/proposals'
+  | '/'
+  | '/action-items'
+  | '/calls-today'
+  | '/client'
+  | '/post-call'
+  | '/proposals'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/action-items'
-    | '/calls-today'
-    | '/client'
-    | '/post-call'
-    | '/proposals'
+  | '/'
+  | '/action-items'
+  | '/calls-today'
+  | '/client'
+  | '/post-call'
+  | '/proposals'
   id:
-    | '__root__'
-    | '/'
-    | '/action-items'
-    | '/calls-today'
-    | '/client'
-    | '/post-call'
-    | '/proposals'
+  | '__root__'
+  | '/'
+  | '/action-items'
+  | '/calls-today'
+  | '/client'
+  | '/post-call'
+  | '/proposals'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {

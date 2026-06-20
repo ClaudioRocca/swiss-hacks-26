@@ -18,3 +18,4 @@ speech-to-text/data/*.db
 # pipeline results
 speech-to-text/results/
 speech-to-text/pipeline_results.json
+speech-to-text/data/
