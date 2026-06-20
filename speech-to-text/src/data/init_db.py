@@ -14,10 +14,11 @@ from pathlib import Path
 import httpx
 from dotenv import load_dotenv
 
-# Load .env from project root (two levels up from this file)
-_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+# Load .env from both speech-to-text/ and project root
+_SPEECH_TO_TEXT_DIR = Path(__file__).resolve().parent.parent.parent
+_PROJECT_ROOT = _SPEECH_TO_TEXT_DIR.parent
+load_dotenv(_SPEECH_TO_TEXT_DIR / ".env")
 load_dotenv(_PROJECT_ROOT / ".env")
-
 import chromadb
 from openai import OpenAI
 
