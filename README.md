@@ -1,1 +1,1 @@
-# SwissHacks from Italy"
+# SwissHacks 2026
