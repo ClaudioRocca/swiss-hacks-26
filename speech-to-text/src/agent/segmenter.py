@@ -13,6 +13,7 @@ import asyncio
 import json
 import os
 from dataclasses import dataclass, field
+from datetime import date
 from typing import Awaitable, Callable, List, Optional
 
 from openai import AsyncOpenAI
@@ -182,10 +183,14 @@ class ConceptSegmenter:
         *,
         model: str = JUDGE_MODEL,
         seed: int = DEFAULT_SEED,
+        now: "date | None" = None,
     ):
         self.on_trigger = on_trigger
         self.model = model
         self.seed = seed
+        # date the extractor resolves spoken/relative dates against (default today);
+        # pin it in tests for reproducible since/until filters.
+        self.today = (now or date.today()).isoformat()
         self.client = AsyncOpenAI()
         self._buffer: List[str] = []
         self._emitted = 0
@@ -288,6 +293,10 @@ class ConceptSegmenter:
                 {
                     "role": "system",
                     "content": (
+                        f"Today's date is {self.today}. Resolve all spoken/relative "
+                        "dates against it (e.g. 'June 18' -> this year unless context "
+                        "says otherwise; 'last month', '3 days ago'). Output since/until "
+                        "as YYYY-MM-DD.\n"
                         "You support a private-bank relationship manager during a live "
                         "client call. For this transcript slice, do TWO things:\n"
                         "1) Extract the core concept (topic, summary, the client's "
