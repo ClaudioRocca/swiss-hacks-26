@@ -195,7 +195,7 @@ function AnalysisContent({ analysis, concepts }: { analysis: PostCallAnalysis; c
               className="rounded-full border px-3 py-1 text-xs font-medium"
               style={{ borderColor: GOLD + "66", background: GOLD + "1A", color: "#8a6f29" }}
             >
-              #{t.replace(/^#/, "")}
+              {t.replace(/^#/, "")}
             </span>
           ))}
         </div>
