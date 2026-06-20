@@ -56,6 +56,12 @@ def make_handlers(show_partials: bool):
         print(f"  {BOLD}intent{RESET}   {chunk.intent}")
         if chunk.entities:
             print(f"  {BOLD}entities{RESET} {', '.join(chunk.entities)}")
+        if chunk.data_requests:
+            print(f"  {BOLD}data plan{RESET}")
+            for r in chunk.data_requests:
+                flt = ", ".join(f"{k}={v}" for k, v in r.filters.items()) or "—"
+                print(f"    {CYAN}{r.source}{RESET}  [{flt}]")
+                print(f"      {DIM}{r.rationale}{RESET}")
         print(f"  {DIM}text     “{chunk.text}”{RESET}")
         print()
 
