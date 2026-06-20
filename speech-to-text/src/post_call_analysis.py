@@ -54,25 +54,30 @@ POST_CALL_SCHEMA = {
                 },
                 "bands": {
                     "type": "array",
-                    "description": "Sentiment segments across call duration in chronological order.",
+                    "description": (
+                        "Sentiment curve data points across the call duration. "
+                        "Provide 8-12 evenly spaced points. Each score MUST be a "
+                        "multiple of 10 (0, 10, 20, ... 90, 100). "
+                        "0 = very negative/guarded, 50 = neutral, 100 = very positive/receptive."
+                    ),
                     "items": {
                         "type": "object",
                         "additionalProperties": False,
                         "properties": {
-                            "from_percent": {
+                            "at_percent": {
                                 "type": "number",
-                                "description": "Start position as percentage of total call duration (0-100).",
+                                "description": "Position as percentage of call duration (0-100).",
                             },
-                            "to_percent": {
-                                "type": "number",
-                                "description": "End position as percentage of total call duration (0-100).",
-                            },
-                            "tone": {
-                                "type": "string",
-                                "enum": ["positive", "neutral", "concerned"],
+                            "score": {
+                                "type": "integer",
+                                "description": (
+                                    "Sentiment score at this point. MUST be a multiple of 10 "
+                                    "(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, or 100). "
+                                    "50 = neutral, above = positive/receptive, below = guarded/concerned."
+                                ),
                             },
                         },
-                        "required": ["from_percent", "to_percent", "tone"],
+                        "required": ["at_percent", "score"],
                     },
                 },
                 "peaks": {

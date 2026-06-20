@@ -2,8 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   AlertTriangle, CheckCircle2, ArrowLeft,
-  Download, Loader2,
-  ShieldAlert, ShieldCheck, Shield, X,
+  Download, Loader2, Newspaper,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -11,6 +10,7 @@ import {
   fetchPostCallAnalysis,
   type PostCallAnalysis,
 } from "../lib/call-session";
+import type { Concept } from "../lib/use-pipeline";
 
 export const Route = createFileRoute("/post-call")({
   head: () => ({ meta: [{ title: "Post-Call Dashboard — RM Intelligence" }] }),
@@ -28,12 +28,6 @@ const PAGE_BG = "#F8F7F4";
 const NAVY = "#141E55";
 const GOLD = "#B8955A";
 
-const TONE_COLOR = {
-  positive: "#16A34A",
-  neutral: "#D97706",
-  concerned: "#DC2626",
-} as const;
-
 const EMOTION_CONFIG = {
   fear: { color: "#DC2626", bg: "#FEF2F2", border: "#FECACA", label: "Fear" },
   joy: { color: "#16A34A", bg: "#F0FDF4", border: "#BBF7D0", label: "Joy" },
@@ -50,7 +44,6 @@ const PRIORITY_CONFIG = {
 
 const RISK_LEVELS = ["conservative", "moderate", "aggressive"] as const;
 const RISK_DISPLAY = { conservative: "Conservative", moderate: "Moderate", aggressive: "Aggressive" };
-const RISK_COLORS = { conservative: "#16A34A", moderate: "#D97706", aggressive: "#DC2626" };
 
 // ---------------------------------------------------------------------------
 // Main page component
@@ -106,7 +99,7 @@ function PostCallPage() {
             .catch((err) => setError(err.message))
             .finally(() => setLoading(false));
         }} />}
-        {analysis && <AnalysisContent analysis={analysis} />}
+        {analysis && <AnalysisContent analysis={analysis} concepts={sessionData.concepts} />}
       </div>
     </div>
   );
@@ -183,8 +176,9 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
 // Analysis Content — renders the AI response
 // ---------------------------------------------------------------------------
 
-function AnalysisContent({ analysis }: { analysis: PostCallAnalysis }) {
-  const [riskModalOpen, setRiskModalOpen] = useState(false);
+function AnalysisContent({ analysis, concepts }: { analysis: PostCallAnalysis; concepts: Concept[] }) {
+  // Extract news articles from executed queries (source === "news")
+  const newsArticles = extractNewsFromConcepts(concepts);
 
   return (
     <>
@@ -207,22 +201,30 @@ function AnalysisContent({ analysis }: { analysis: PostCallAnalysis }) {
         </div>
       </Card>
 
-      {/* Sentiment bar (compact — no peak list, no overall ring) */}
+      {/* Risk Profile — expanded, right below summary */}
       <Card className="col-span-12">
-        <CardHeader title="Conversation Sentiment" eyebrow="Sentiment" />
+        <CardHeader title="Risk Profile Comparison" eyebrow="Risk Shift Detection" />
+        <RiskToleranceSection risk={analysis.risk_tolerance} />
+      </Card>
+      {/* Conversation sentiment analysis — actionable sentiment with context */}
+      <Card className="col-span-12">
+        <CardHeader title="Conversation sentiment analysis" eyebrow="Engagement Signals" />
         <SentimentSection sentiment={analysis.sentiment} />
       </Card>
 
-      {/* Emotional Signals — elevated position */}
+      {/* Emotional Signals — compact layout */}
       <Card className="col-span-12">
         <CardHeader title="Emotional Signals" eyebrow="Client Emotions" />
         <EmotionalTopics topics={analysis.emotional_topics} />
       </Card>
 
-      {/* Risk Profile — shown as a prominent trigger card that opens a modal */}
-      <Card className="col-span-12">
-        <RiskTriggerCard risk={analysis.risk_tolerance} onOpen={() => setRiskModalOpen(true)} />
-      </Card>
+      {/* Relevant Market News — from call data */}
+      {newsArticles.length > 0 && (
+        <Card className="col-span-12">
+          <CardHeader title="Relevant Market Context" eyebrow="News Retrieved During Call" />
+          <NewsSection articles={newsArticles} />
+        </Card>
+      )}
 
       {/* Action Items */}
       <Card className="col-span-12">
@@ -233,11 +235,6 @@ function AnalysisContent({ analysis }: { analysis: PostCallAnalysis }) {
           ))}
         </ul>
       </Card>
-
-      {/* Risk Profile Modal */}
-      {riskModalOpen && (
-        <RiskModal risk={analysis.risk_tolerance} onClose={() => setRiskModalOpen(false)} />
-      )}
     </>
   );
 }
@@ -247,55 +244,165 @@ function AnalysisContent({ analysis }: { analysis: PostCallAnalysis }) {
 // ---------------------------------------------------------------------------
 
 function SentimentSection({ sentiment }: { sentiment: PostCallAnalysis["sentiment"] }) {
-  // Build gradient from bands
-  const gradientStops = sentiment.bands.map((b) => {
-    const color = TONE_COLOR[b.tone];
-    return `${color} ${b.from_percent}%, ${color} ${b.to_percent}%`;
-  }).join(", ");
+  const points = sentiment.bands;
+  if (!points.length) return null;
+
+  // Chart dimensions
+  const W = 600, H = 140, PAD_X = 56, PAD_Y = 16;
+  const chartW = W - PAD_X - 20; // right padding smaller
+  const chartH = H - PAD_Y * 2;
+  const midY = PAD_Y + chartH * 0.5; // 50-score line
+
+  // Map data points to SVG coords
+  const coords = points.map((p) => ({
+    x: PAD_X + (p.at_percent / 100) * chartW,
+    y: PAD_Y + chartH - (p.score / 100) * chartH,
+    score: p.score,
+  }));
+
+  // Build smooth curve (catmull-rom to bezier)
+  const linePath = smoothPath(coords.map((c) => [c.x, c.y]));
+  // Area: same curve, closed to bottom
+  const areaPath = `${linePath} L ${coords[coords.length - 1].x} ${PAD_Y + chartH} L ${coords[0].x} ${PAD_Y + chartH} Z`;
+
+  // Peak positions on the curve (interpolate Y from nearest data)
+  const peakCoords = sentiment.peaks.map((p) => {
+    const px = PAD_X + (p.at_percent / 100) * chartW;
+    // Linear interpolation between closest data points
+    let py = midY;
+    for (let i = 0; i < coords.length - 1; i++) {
+      if (px >= coords[i].x && px <= coords[i + 1].x) {
+        const t = (px - coords[i].x) / (coords[i + 1].x - coords[i].x);
+        py = coords[i].y + t * (coords[i + 1].y - coords[i].y);
+        break;
+      }
+    }
+    return { x: px, y: py, ...p };
+  });
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between text-[11px]" style={{ color: MUTED }}>
-        <span>Start</span>
-        <span>Sentiment across call duration</span>
-        <span>End</span>
+      <div className="mb-2 flex items-center justify-between text-[11px]" style={{ color: MUTED }}>
+        <span>Call start</span>
+        <span>Call end</span>
       </div>
-      {/* Bar with hover-only peak tooltips */}
-      <div className="relative w-full" style={{ paddingTop: 18, paddingBottom: 4 }}>
-        {/* Peak dot markers — positioned above the bar */}
-        {sentiment.peaks.map((p, i) => (
-          <div
-            key={i}
-            className="group absolute -translate-x-1/2"
-            style={{ left: `${p.at_percent}%`, top: 4, zIndex: 20 }}
-          >
-            <span
-              className="block h-3 w-3 rounded-full ring-2 ring-white cursor-pointer"
-              style={{ background: TONE_COLOR[p.tone], boxShadow: "0 1px 4px rgba(10,18,64,0.2)" }}
+
+      {/* SVG Area Chart */}
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: 160 }}>
+        <defs>
+          <linearGradient id="sentiment-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={GOLD} stopOpacity="0.35" />
+            <stop offset="100%" stopColor={GOLD} stopOpacity="0.03" />
+          </linearGradient>
+        </defs>
+
+        {/* Horizontal grid lines */}
+        {[0, 25, 50, 75, 100].map((v) => {
+          const y = PAD_Y + chartH - (v / 100) * chartH;
+          return (
+            <line
+              key={v}
+              x1={PAD_X} y1={y} x2={PAD_X + chartW} y2={y}
+              stroke={v === 50 ? "#D1D5DB" : "#F3F4F6"}
+              strokeWidth={v === 50 ? "1" : "0.5"}
+              strokeDasharray={v === 50 ? "4 3" : "none"}
             />
-            {/* Tooltip — shown ABOVE the dot on hover */}
-            <div
-              className="pointer-events-none absolute left-1/2 bottom-full mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg px-3 py-1.5 text-[11px] text-white shadow-xl group-hover:block"
-              style={{ background: NAVY, zIndex: 50 }}
-            >
-              {p.label}
-              <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent" style={{ borderTopColor: NAVY }} />
-            </div>
-          </div>
+          );
+        })}
+
+        {/* Area fill */}
+        <path d={areaPath} fill="url(#sentiment-fill)" />
+
+        {/* Curve line */}
+        <path d={linePath} fill="none" stroke={NAVY} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+
+        {/* Data points */}
+        {coords.map((c, i) => (
+          <circle key={i} cx={c.x} cy={c.y} r="3" fill={NAVY} stroke="#fff" strokeWidth="1.5" />
         ))}
-        {/* Gradient bar */}
-        <div
-          className="relative h-[8px] w-full overflow-hidden rounded-full"
-          style={{ background: `linear-gradient(90deg, ${gradientStops})` }}
-        />
+
+        {/* Peak markers — color derived from position on curve, not tone */}
+        {peakCoords.map((p, i) => {
+          // Score at this peak's position (interpolated)
+          const score = 100 - ((p.y - PAD_Y) / chartH) * 100;
+          const dotColor = score >= 50 ? GOLD : "#DC2626";
+          return (
+            <g key={i}>
+              <circle cx={p.x} cy={p.y} r="5.5" fill={dotColor} stroke="#fff" strokeWidth="2" />
+            </g>
+          );
+        })}
+
+        {/* Y-axis labels — descriptive */}
+        <text x={PAD_X - 6} y={PAD_Y + 4} textAnchor="end" fontSize="9" fill={MUTED}>Receptive</text>
+        <text x={PAD_X - 6} y={midY + 3} textAnchor="end" fontSize="9" fill={MUTED}>Neutral</text>
+        <text x={PAD_X - 6} y={PAD_Y + chartH + 4} textAnchor="end" fontSize="9" fill={MUTED}>Guarded</text>
+      </svg>
+
+      {/* Legend */}
+      <div className="mt-1 flex items-center gap-4 text-[10px]" style={{ color: MUTED }}>
+        <span className="inline-flex items-center gap-1">
+          <span className="h-2 w-2 rounded-full" style={{ background: GOLD }} /> Receptive moment
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="h-2 w-2 rounded-full" style={{ background: "#DC2626" }} /> Guarded moment
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="h-[1px] w-4 inline-block border-t border-dashed" style={{ borderColor: "#D1D5DB" }} /> Neutral (50)
+        </span>
       </div>
-      <div className="mt-3 flex gap-4 text-[11px]" style={{ color: MUTED }}>
-        <Legend color={TONE_COLOR.positive} label="Positive" />
-        <Legend color={TONE_COLOR.neutral} label="Neutral" />
-        <Legend color={TONE_COLOR.concerned} label="Concerned" />
+
+      {/* Peak annotations */}
+      <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+        {sentiment.peaks.map((p, i) => {
+          // Determine color from interpolated score at this peak position
+          const peakData = peakCoords[i];
+          const score = peakData ? 100 - ((peakData.y - PAD_Y) / chartH) * 100 : 50;
+          const dotColor = score >= 50 ? GOLD : "#DC2626";
+          return (
+            <div
+              key={i}
+              className="flex items-start gap-2 px-3 py-2"
+              style={{
+                background: "#FAFAF9",
+                border: `1px solid ${dotColor}33`,
+                borderRadius: 10,
+              }}
+            >
+              <span
+                className="mt-1 h-2 w-2 shrink-0 rounded-full"
+                style={{ background: dotColor }}
+              />
+              <span className="text-xs leading-relaxed" style={{ color: TEXT }}>{p.label}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
+}
+
+/** Generate a smooth SVG path from points using Catmull-Rom → cubic bezier conversion. */
+function smoothPath(pts: number[][]): string {
+  if (pts.length < 2) return "";
+  if (pts.length === 2) return `M ${pts[0][0]} ${pts[0][1]} L ${pts[1][0]} ${pts[1][1]}`;
+
+  let d = `M ${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(i - 1, 0)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(i + 2, pts.length - 1)];
+
+    // Catmull-Rom to cubic bezier control points (tension = 0.5)
+    const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+
+    d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2[0]} ${p2[1]}`;
+  }
+  return d;
 }
 
 // ---------------------------------------------------------------------------
@@ -304,31 +411,31 @@ function SentimentSection({ sentiment }: { sentiment: PostCallAnalysis["sentimen
 
 function EmotionalTopics({ topics }: { topics: PostCallAnalysis["emotional_topics"] }) {
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {topics.map((t, i) => {
         const cfg = EMOTION_CONFIG[t.emotion];
         return (
           <div
             key={i}
-            className="p-4"
-            style={{ background: "#FAFAF9", border: `1px solid ${BORDER}`, borderRadius: 14 }}
+            className="p-3"
+            style={{ background: "#FAFAF9", border: `1px solid ${BORDER}`, borderRadius: 12 }}
           >
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-1.5">
               <span
-                className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+                className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
                 style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}
               >
                 {cfg.label}
               </span>
-              <span className="text-sm font-medium" style={{ color: NAVY }}>{t.topic}</span>
+              <span className="text-xs font-medium truncate" style={{ color: NAVY }}>{t.topic}</span>
             </div>
             <blockquote
-              className="mb-2 pl-3 text-sm italic"
-              style={{ borderLeft: `3px solid ${cfg.color}`, color: BODY }}
+              className="mb-1.5 pl-2.5 text-xs italic leading-relaxed"
+              style={{ borderLeft: `2px solid ${cfg.color}`, color: BODY }}
             >
               "{t.quote}"
             </blockquote>
-            <p className="text-xs" style={{ color: MUTED }}>{t.explanation}</p>
+            <p className="text-[11px] leading-snug" style={{ color: MUTED }}>{t.explanation}</p>
           </div>
         );
       })}
@@ -337,195 +444,50 @@ function EmotionalTopics({ topics }: { topics: PostCallAnalysis["emotional_topic
 }
 
 // ---------------------------------------------------------------------------
-// Risk Profile — Trigger card (teaser) + full Modal
 // ---------------------------------------------------------------------------
-
-function RiskTriggerCard({ risk, onOpen }: { risk: PostCallAnalysis["risk_tolerance"]; onOpen: () => void }) {
-  const shifted = risk.shift_detected;
-  return (
-    <div
-      className="flex items-center justify-between cursor-pointer transition-shadow hover:shadow-lg"
-      onClick={onOpen}
-      style={{ margin: -28, padding: 28 }}
-    >
-      <div className="flex items-center gap-4">
-        <div
-          className="flex h-12 w-12 items-center justify-center rounded-2xl"
-          style={{
-            background: shifted ? "#FEF2F2" : "#F0FDF4",
-            border: `1px solid ${shifted ? "#FECACA" : "#BBF7D0"}`,
-          }}
-        >
-          {shifted
-            ? <AlertTriangle className="h-5 w-5" style={{ color: "#DC2626" }} />
-            : <ShieldCheck className="h-5 w-5" style={{ color: "#16A34A" }} />
-          }
-        </div>
-        <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: GOLD }}>
-            Risk Shift Detection
-          </div>
-          <div className="font-serif text-lg" style={{ color: NAVY }}>
-            {shifted
-              ? `Shift detected: ${RISK_DISPLAY[risk.known_profile]} → ${RISK_DISPLAY[risk.detected_appetite]}`
-              : "Profile aligned — no shift detected"
-            }
-          </div>
-          <p className="text-xs mt-0.5" style={{ color: MUTED }}>Click to view full risk profile comparison</p>
-        </div>
-      </div>
-      <div
-        className="rounded-xl px-4 py-2 text-sm font-medium"
-        style={{ background: NAVY, color: "#fff" }}
-      >
-        View Details
-      </div>
-    </div>
-  );
-}
-
-function RiskModal({ risk, onClose }: { risk: PostCallAnalysis["risk_tolerance"]; onClose: () => void }) {
-  // Close on Escape
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "rgba(10,18,64,0.6)", backdropFilter: "blur(4px)" }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div
-        className="relative w-full max-w-xl mx-4 max-h-[85vh] overflow-y-auto rounded-3xl p-8"
-        style={{ background: CARD_BG, boxShadow: "0 25px 60px rgba(10,18,64,0.25)" }}
-      >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100"
-          aria-label="Close"
-        >
-          <X className="h-4 w-4" style={{ color: MUTED }} />
-        </button>
-
-        <div className="text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: GOLD }}>
-          Risk Shift Detection
-        </div>
-        <h2 className="mt-1 font-serif text-2xl" style={{ color: NAVY }}>
-          Risk Profile Comparison
-        </h2>
-        <p className="mt-1 text-sm" style={{ color: MUTED }}>
-          Comparing known KYC profile with appetite detected in the conversation.
-        </p>
-
-        <div className="mt-6">
-          <RiskToleranceSection risk={risk} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Risk Tolerance Comparison (used inside the modal)
+// Risk Tolerance Comparison
 // ---------------------------------------------------------------------------
 
 function RiskToleranceSection({ risk }: { risk: PostCallAnalysis["risk_tolerance"] }) {
-  const KnownIcon = risk.known_profile === "conservative" ? ShieldCheck
-    : risk.known_profile === "aggressive" ? ShieldAlert : Shield;
-  const DetectedIcon = risk.detected_appetite === "conservative" ? ShieldCheck
-    : risk.detected_appetite === "aggressive" ? ShieldAlert : Shield;
-
   return (
-    <div className="space-y-4">
-      {/* Visual comparison */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="p-4 text-center" style={{ background: "#FAFAF9", border: `1px solid ${BORDER}`, borderRadius: 14 }}>
-          <KnownIcon className="mx-auto h-6 w-6 mb-2" style={{ color: RISK_COLORS[risk.known_profile] }} />
-          <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: MUTED }}>KYC Profile</div>
-          <div className="text-sm font-semibold" style={{ color: RISK_COLORS[risk.known_profile] }}>
-            {RISK_DISPLAY[risk.known_profile]}
-          </div>
-        </div>
-        <div className="p-4 text-center" style={{ background: "#FAFAF9", border: `1px solid ${BORDER}`, borderRadius: 14 }}>
-          <DetectedIcon className="mx-auto h-6 w-6 mb-2" style={{ color: RISK_COLORS[risk.detected_appetite] }} />
-          <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: MUTED }}>Detected in Call</div>
-          <div className="text-sm font-semibold" style={{ color: RISK_COLORS[risk.detected_appetite] }}>
-            {RISK_DISPLAY[risk.detected_appetite]}
-          </div>
-        </div>
+    <div className="space-y-5">
+      {/* Gauge charts — side by side */}
+      <div className="grid grid-cols-2 gap-6">
+        <RiskGauge label="KYC Profile" level={risk.known_profile} />
+        <RiskGauge label="Detected in Call" level={risk.detected_appetite} />
       </div>
 
       {/* Shift indicator */}
       {risk.shift_detected ? (
         <div
-          className="flex items-center gap-2 p-3 rounded-xl"
-          style={{ background: "#FEF2F2", border: "1px solid #FECACA" }}
+          className="flex items-center gap-3 p-4 rounded-xl"
+          style={{ background: "#FEF9F0", border: `1px solid ${GOLD}44` }}
         >
-          <AlertTriangle className="h-4 w-4 shrink-0" style={{ color: "#DC2626" }} />
-          <span className="text-xs font-medium" style={{ color: "#DC2626" }}>
-            Risk appetite shift detected — profile review may be warranted
-          </span>
+          <AlertTriangle className="h-5 w-5 shrink-0" style={{ color: GOLD }} />
+          <div>
+            <span className="text-sm font-medium" style={{ color: NAVY }}>
+              Profile shift detected: {RISK_DISPLAY[risk.known_profile]} → {RISK_DISPLAY[risk.detected_appetite]}
+            </span>
+            <p className="text-xs mt-0.5" style={{ color: MUTED }}>
+              The client's expressed preferences diverge from their recorded profile.
+            </p>
+          </div>
         </div>
       ) : (
         <div
-          className="flex items-center gap-2 p-3 rounded-xl"
-          style={{ background: "#F0FDF4", border: "1px solid #BBF7D0" }}
+          className="flex items-center gap-3 p-4 rounded-xl"
+          style={{ background: "#F8FFFE", border: "1px solid #D1FAE5" }}
         >
-          <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: "#16A34A" }} />
-          <span className="text-xs font-medium" style={{ color: "#16A34A" }}>
+          <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: "#059669" }} />
+          <span className="text-sm font-medium" style={{ color: NAVY }}>
             Detected appetite aligns with known profile
           </span>
         </div>
       )}
 
-      {/* Scale visualization */}
-      <div className="px-2">
-        <div className="flex justify-between text-[10px] mb-1" style={{ color: MUTED }}>
-          {RISK_LEVELS.map((l) => <span key={l}>{RISK_DISPLAY[l]}</span>)}
-        </div>
-        <div className="relative h-2 rounded-full overflow-hidden" style={{ background: SOFT }}>
-          <div className="absolute inset-0 rounded-full"
-            style={{ background: "linear-gradient(90deg, #16A34A, #D97706, #DC2626)" , opacity: 0.3 }} />
-          {/* Known marker */}
-          <div
-            className="absolute top-1/2 -translate-y-1/2 h-3.5 w-3.5 rounded-full border-2 border-white"
-            style={{
-              left: `${RISK_LEVELS.indexOf(risk.known_profile) * 50}%`,
-              background: RISK_COLORS[risk.known_profile],
-              boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-            }}
-            title="KYC Profile"
-          />
-          {/* Detected marker */}
-          <div
-            className="absolute top-1/2 -translate-y-1/2 h-3.5 w-3.5 rounded-sm border-2 border-white rotate-45"
-            style={{
-              left: `${RISK_LEVELS.indexOf(risk.detected_appetite) * 50}%`,
-              background: RISK_COLORS[risk.detected_appetite],
-              boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-            }}
-            title="Detected in Call"
-          />
-        </div>
-        <div className="flex gap-4 mt-2 text-[10px]" style={{ color: MUTED }}>
-          <span className="inline-flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full" style={{ background: RISK_COLORS[risk.known_profile] }} />
-            KYC
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="h-2 w-2 rounded-sm rotate-45" style={{ background: RISK_COLORS[risk.detected_appetite] }} />
-            Detected
-          </span>
-        </div>
-      </div>
-
       {/* Evidence */}
       <div>
-        <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: GOLD }}>Evidence</div>
+        <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: GOLD }}>Evidence from conversation</div>
         <ul className="space-y-2">
           {risk.evidence.map((e, i) => (
             <li key={i} className="flex items-start gap-2 text-xs" style={{ color: BODY }}>
@@ -536,10 +498,200 @@ function RiskToleranceSection({ risk }: { risk: PostCallAnalysis["risk_tolerance
         </ul>
       </div>
 
-      {/* Notes */}
+      {/* Comparison notes */}
       <p className="text-xs leading-relaxed" style={{ color: MUTED }}>
         {risk.comparison_notes}
       </p>
+    </div>
+  );
+}
+
+/**
+ * Semi-circle gauge chart for risk level visualization.
+ *
+ * Uses a neutral gradient (teal → gold → navy) — risk appetite isn't
+ * inherently good or bad. The needle comparison between the two gauges
+ * is what communicates the shift.
+ */
+function RiskGauge({ label, level }: { label: string; level: "conservative" | "moderate" | "aggressive" }) {
+  // The arc sweeps from left (180°) to right (0°) — a half circle above center.
+  // Needle angles: conservative → left (180°), moderate → top (90°), aggressive → right (0°).
+  // In our SVG coordinate system (0° = right, counter-clockwise):
+  //   conservative = 180° from positive-x = left
+  //   moderate = 90° from positive-x = top
+  //   aggressive = 0° from positive-x = right
+  const angleMap = { conservative: 180, moderate: 90, aggressive: 0 };
+  const needleAngleDeg = angleMap[level];
+
+  const cx = 100, cy = 100, r = 72;
+  const needleLen = 55;
+  const gradId = `gauge-grad-${label.replace(/\s+/g, "-").toLowerCase()}`;
+
+  // Needle endpoint (SVG: 0° is right, angles go counter-clockwise for upper half)
+  const rad = (needleAngleDeg * Math.PI) / 180;
+  const nx = cx + needleLen * Math.cos(rad);
+  const ny = cy - needleLen * Math.sin(rad); // subtract because SVG y is inverted
+
+  return (
+    <div className="flex flex-col items-center">
+      <svg viewBox="0 0 200 115" className="w-full max-w-[200px]">
+        <defs>
+          <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#0D9488" />
+            <stop offset="50%" stopColor="#B8955A" />
+            <stop offset="100%" stopColor="#1E3A5F" />
+          </linearGradient>
+        </defs>
+        {/* Background track (light) */}
+        <path
+          d={describeArc(cx, cy, r, 180, 0)}
+          fill="none"
+          stroke="#F1ECE0"
+          strokeWidth="16"
+          strokeLinecap="round"
+        />
+        {/* Colored gradient arc */}
+        <path
+          d={describeArc(cx, cy, r, 180, 0)}
+          fill="none"
+          stroke={`url(#${gradId})`}
+          strokeWidth="16"
+          strokeLinecap="round"
+        />
+        {/* Tick marks at the three positions */}
+        {[180, 90, 0].map((angle) => {
+          const a = (angle * Math.PI) / 180;
+          const rInner = r - 12;
+          const rOuter = r - 4;
+          return (
+            <line
+              key={angle}
+              x1={cx + rInner * Math.cos(a)}
+              y1={cy - rInner * Math.sin(a)}
+              x2={cx + rOuter * Math.cos(a)}
+              y2={cy - rOuter * Math.sin(a)}
+              stroke="#9CA3AF"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          );
+        })}
+        {/* Needle */}
+        <line
+          x1={cx}
+          y1={cy}
+          x2={nx}
+          y2={ny}
+          stroke={NAVY}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+        {/* Center hub */}
+        <circle cx={cx} cy={cy} r="6" fill={NAVY} />
+        <circle cx={cx} cy={cy} r="3" fill="#fff" />
+      </svg>
+      {/* Axis labels */}
+      <div className="w-full max-w-[200px] flex justify-between px-1 -mt-1">
+        <span className="text-[9px]" style={{ color: MUTED }}>Conservative</span>
+        <span className="text-[9px]" style={{ color: MUTED }}>Aggressive</span>
+      </div>
+      {/* Title + value */}
+      <div className="mt-2 text-center">
+        <div className="text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>{label}</div>
+        <div className="text-sm font-semibold" style={{ color: NAVY }}>{RISK_DISPLAY[level]}</div>
+      </div>
+    </div>
+  );
+}
+
+/** Describe an SVG arc path for the upper half-circle (angles in degrees, 0°=right, CCW positive). */
+function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number): string {
+  // Convert to SVG cartesian (y-inverted)
+  const startRad = (startAngle * Math.PI) / 180;
+  const endRad = (endAngle * Math.PI) / 180;
+  const x1 = cx + r * Math.cos(startRad);
+  const y1 = cy - r * Math.sin(startRad);
+  const x2 = cx + r * Math.cos(endRad);
+  const y2 = cy - r * Math.sin(endRad);
+  // For a half circle (180° sweep), large-arc-flag = 0, sweep-flag = 1 (clockwise in SVG)
+  return `M ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2}`;
+}
+
+// ---------------------------------------------------------------------------
+// News extraction from call data + rendering
+// ---------------------------------------------------------------------------
+
+type NewsArticle = {
+  document: string;
+  source: string;
+  category: string;
+  published_date: string;
+  tickers_mentioned: string;
+};
+
+function extractNewsFromConcepts(concepts: Concept[]): NewsArticle[] {
+  const seen = new Set<string>();
+  const articles: NewsArticle[] = [];
+
+  for (const concept of concepts) {
+    for (const eq of concept.executed_queries) {
+      if (eq.source !== "news" || eq.error) continue;
+      const results = eq.results as Array<Record<string, unknown>> | null;
+      if (!Array.isArray(results)) continue;
+      for (const r of results) {
+        const doc = String(r.document || "");
+        if (!doc || seen.has(doc)) continue;
+        seen.add(doc);
+        const meta = (r.metadata || {}) as Record<string, string>;
+        articles.push({
+          document: doc,
+          source: meta.source || "",
+          category: meta.category || "",
+          published_date: meta.published_date || "",
+          tickers_mentioned: meta.tickers_mentioned || "",
+        });
+      }
+    }
+  }
+  return articles;
+}
+
+function NewsSection({ articles }: { articles: NewsArticle[] }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      {articles.map((a, i) => (
+        <article
+          key={i}
+          className="flex flex-col gap-2 p-4"
+          style={{ background: "#FAFAF9", border: `1px solid ${BORDER}`, borderRadius: 14 }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Newspaper className="h-3.5 w-3.5" style={{ color: GOLD }} />
+              <span
+                className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider"
+                style={{ background: GOLD + "1A", color: "#8a6f29", border: `1px solid ${GOLD}55` }}
+              >
+                {a.category || "Market"}
+              </span>
+            </div>
+            {a.published_date && (
+              <span className="text-[10px]" style={{ color: MUTED }}>{a.published_date}</span>
+            )}
+          </div>
+          <p className="text-xs leading-relaxed flex-1" style={{ color: TEXT }}>
+            {a.document.length > 180 ? `${a.document.slice(0, 180)}…` : a.document}
+          </p>
+          <div className="flex items-center justify-between pt-1 border-t" style={{ borderColor: BORDER }}>
+            <span className="text-[10px] font-medium" style={{ color: MUTED }}>{a.source}</span>
+            {a.tickers_mentioned && (
+              <span className="text-[10px]" style={{ color: NAVY }}>
+                {a.tickers_mentioned}
+              </span>
+            )}
+          </div>
+        </article>
+      ))}
     </div>
   );
 }
@@ -574,15 +726,6 @@ function CardHeader({ title, eyebrow }: { title: string; eyebrow?: string }) {
       )}
       <h2 className="font-serif" style={{ color: NAVY, fontSize: 22 }}>{title}</h2>
     </div>
-  );
-}
-
-function Legend({ color, label }: { color: string; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className="h-2 w-2 rounded-full" style={{ background: color }} />
-      {label}
-    </span>
   );
 }
 
