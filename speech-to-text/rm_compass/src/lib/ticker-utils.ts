@@ -12,8 +12,8 @@ const TICKER_MAP: Record<string, string> = {
   "NOVN.SW": "SIX:NOVN",
   "UBSG": "SIX:UBSG",
   "UBSG.SW": "SIX:UBSG",
-  "ROP": "SIX:ROG",   // Roche (our data layer uses ROP); SIX:ROG on TradingView
-  "ROG": "SIX:ROG",
+  "ROP": "SIX:ROP",   // Roche (our data layer uses ROP); SIX:ROP exists on TradingView
+  "ROG": "SIX:ROP",
   "ZURN": "SIX:ZURN",
   "ABBN": "SIX:ABBN",
   "SREN": "SIX:SREN",
@@ -56,7 +56,7 @@ const ENTITY_NAME_MAP: Record<string, string> = {
   "nestlé": "SIX:NESN",
   "nestle": "SIX:NESN",
   "novartis": "SIX:NOVN",
-  "roche": "SIX:ROG",
+  "roche": "SIX:ROP",
   "asml": "EURONEXT:ASML",
   "ubs": "SIX:UBSG",
   "zurich insurance": "SIX:ZURN",
