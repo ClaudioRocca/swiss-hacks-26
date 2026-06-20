@@ -30,7 +30,7 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-# Load .env from speech-to-text/ first, then fall back to parent (swiss-hacks-26/.env)
+# Load .env from backend/ first, then fall back to project root (.env)
 _here = Path(__file__).parent
 load_dotenv(_here / ".env")
 load_dotenv(_here.parent / ".env")
