@@ -112,16 +112,23 @@ class RealtimeTranscriber:
         on_partial: PartialCb | None,
         on_final: FinalCb | None,
     ) -> None:
-        # while audio is still being sent, wait indefinitely for events;
-        # once the audio is fully sent, exit after a short idle gap so the
-        # last finalized utterance has time to arrive.
+        # Poll with a finite timeout so the loop keeps re-checking sender state.
+        # While audio is still streaming, a timeout just means "nothing yet" and
+        # we loop again. Once the audio is fully sent, a gap of idle_timeout with
+        # no events means the stream is finished.
+        poll_timeout = 0.5
         idle_timeout = 3.0
+        idle_elapsed = 0.0
         while True:
             try:
-                timeout = None if not sender.done() else idle_timeout
-                raw = await asyncio.wait_for(ws.recv(), timeout=timeout)
+                raw = await asyncio.wait_for(ws.recv(), timeout=poll_timeout)
+                idle_elapsed = 0.0
             except asyncio.TimeoutError:
-                break  # audio done + no events for idle_timeout -> finished
+                if sender.done():
+                    idle_elapsed += poll_timeout
+                    if idle_elapsed >= idle_timeout:
+                        break  # audio done + quiet -> finished
+                continue
             except websockets.ConnectionClosed:
                 break
 
