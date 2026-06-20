@@ -13,6 +13,7 @@ the segmenter as if STT had finalized those utterances — for fast stress tests
 
 from __future__ import annotations
 
+import asyncio
 import re
 from datetime import date
 from typing import Iterable, List, Optional, Tuple, Union
@@ -69,6 +70,7 @@ async def run_utterances(
     on_trigger: TriggerCb,
     on_final: Optional[PartialCb] = None,
     now: date | None = None,
+    pace: float = 0.0,
 ) -> None:
     """Feed pre-split utterances straight into the segmenter (no audio, no STT).
 
@@ -79,6 +81,8 @@ async def run_utterances(
     pull). `on_final` mirrors each line to the transcript with its speaker.
 
     `now` pins the date the extractor resolves relative dates against.
+    `pace` is seconds-per-word: when > 0, sleep after each utterance for roughly
+    its spoken duration so the transcript streams at a natural speaking rhythm.
     """
     segmenter = ConceptSegmenter(on_trigger, now=now)
     for utt in utterances:
@@ -91,6 +95,11 @@ async def run_utterances(
             continue
         if on_final:
             await _maybe_await(on_final(text, speaker))
+        if pace > 0:
+            # ~spoken duration of this line, clamped so very short/long lines
+            # still feel natural (min half a second, cap at 9s).
+            words = len(text.split())
+            await asyncio.sleep(min(max(words * pace, 0.5), 9.0))
         await segmenter.add_final(text, speaker)
     await segmenter.close()
 
@@ -101,10 +110,11 @@ async def run_text(
     on_trigger: TriggerCb,
     on_final: Optional[PartialCb] = None,
     now: date | None = None,
+    pace: float = 0.0,
 ) -> None:
     """Same as run_utterances but splits raw text into sentence-ish utterances."""
     await run_utterances(
-        split_utterances(text), on_trigger=on_trigger, on_final=on_final, now=now
+        split_utterances(text), on_trigger=on_trigger, on_final=on_final, now=now, pace=pace
     )
 
 

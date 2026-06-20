@@ -222,6 +222,7 @@ async def websocket_pipeline(ws: WebSocket):
                     for r in chunk.data_requests
                 ],
                 "executed_queries": executed,
+                "line_indices": chunk.line_indices,
             }
             try:
                 await ws.send_json(payload)
@@ -241,7 +242,8 @@ async def websocket_pipeline(ws: WebSocket):
         else:
             # Text mode: read the script, stream utterances through segmenter
             text = resolved.read_text()
-            await run_text(text, on_trigger=on_trigger, on_final=on_final, now=DEMO_NOW)
+            # ~0.32s/word ≈ 185 wpm — natural speaking cadence for the demo stream
+            await run_text(text, on_trigger=on_trigger, on_final=on_final, now=DEMO_NOW, pace=0.32)
 
         await ws.send_json({"type": "done"})
 
