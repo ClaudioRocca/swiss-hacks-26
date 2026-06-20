@@ -238,7 +238,7 @@ async def main() -> int:
         help="audio file (mp3/wav/m4a/…) — the primary input. A .txt/.md file "
         "uses the text-only path instead. Default: call_4 text script.",
     )
-    p.add_argument("--out", default="pipeline_results.json", help="JSON output path")
+    p.add_argument("--out", default="results/pipeline_results.json", help="JSON output path")
     p.add_argument(
         "--language", default=None, help="ISO-639-1 STT hint for audio, e.g. en"
     )
@@ -270,7 +270,9 @@ async def main() -> int:
         "query_count": sum(len(c["executed_queries"]) for c in concepts),
         "concepts": concepts,
     }
-    Path(args.out).write_text(json.dumps(payload, indent=2, ensure_ascii=False, default=str))
+    out_path = Path(args.out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False, default=str))
 
     _print_summary(concepts)
     print("\n" + "=" * 70)
