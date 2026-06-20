@@ -208,7 +208,6 @@ async def websocket_pipeline(ws: WebSocket):
                 "type": "concept",
                 "index": chunk.index,
                 "topic": chunk.topic,
-                "summary": chunk.summary,
                 "intent": chunk.intent,
                 "entities": chunk.entities,
                 "text": chunk.text,

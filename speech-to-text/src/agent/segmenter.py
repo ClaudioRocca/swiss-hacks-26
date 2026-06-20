@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Awaitable, Callable, List, Optional
 
+import httpx
 from openai import AsyncOpenAI
 
 JUDGE_MODEL = os.getenv("AGENT_MODEL", "gpt-4o-mini")
@@ -41,7 +42,6 @@ class ConceptChunk:
 
     text: str
     topic: str
-    summary: str
     intent: str
     entities: List[str] = field(default_factory=list)
     data_requests: List[DataRequest] = field(default_factory=list)
@@ -183,7 +183,6 @@ _EXTRACT_SCHEMA = {
             ),
         },
         "topic": {"type": "string", "description": "2-5 word concept label"},
-        "summary": {"type": "string", "description": "one-sentence summary"},
         "intent": {"type": "string", "description": "what the client wants/means"},
         "entities": {"type": "array", "items": {"type": "string"}},
         "data_requests": {
@@ -197,7 +196,7 @@ _EXTRACT_SCHEMA = {
             "items": _DATA_REQUEST_SCHEMA,
         },
     },
-    "required": ["is_relevant", "topic", "summary", "intent", "entities", "data_requests"],
+    "required": ["is_relevant", "topic", "intent", "entities", "data_requests"],
 }
 
 # fixed seed + temperature 0 => near-reproducible judge/extract calls
@@ -219,7 +218,9 @@ class ConceptSegmenter:
         # date the extractor resolves spoken/relative dates against (default today);
         # pin it in tests for reproducible since/until filters.
         self.today = (now or date.today()).isoformat()
-        self.client = AsyncOpenAI()
+        self.client = AsyncOpenAI(
+            http_client=httpx.AsyncClient(verify=False),
+        )
         self._buffer: List[str] = []
         self._emitted = 0
 
@@ -404,7 +405,6 @@ class ConceptSegmenter:
         chunk = ConceptChunk(
             text=text,
             topic=data["topic"],
-            summary=data["summary"],
             intent=data["intent"],
             entities=data["entities"],
             data_requests=requests,
