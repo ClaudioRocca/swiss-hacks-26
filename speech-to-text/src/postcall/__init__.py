@@ -1,15 +1,13 @@
 """Post-call pipeline.
 
-Two layers, in order (synthesis is out of scope for now):
-  1. extraction  — LLM: last call transcript -> structured facts (extraction.py)
-  2. retrieval   — deterministic: build the client's risk-profile trend (retrieval.py)
+  - retrieval — deterministic: build the client's risk-profile trend (retrieval.py)
+  - synthesis — LLM: turn the evidence packet into an RM pre-brief (synthesis.py, WIP)
+
+The live, frontend-facing call analysis lives in src/post_call_analysis.py.
 """
 
-from .extraction import extract_facts, extract_and_store
 from .retrieval import build_risk_trend
 
 __all__ = [
-    "extract_facts",
-    "extract_and_store",
     "build_risk_trend",
 ]
