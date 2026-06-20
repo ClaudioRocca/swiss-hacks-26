@@ -257,8 +257,15 @@ class ConceptSegmenter:
         # buffer holds (speaker, text, line_index) so the agent reads the labeled
         # exchange and each concept can point back to its transcript lines
         self._buffer: List[tuple[str, str, int]] = []
+        # a thin "preamble" concept (relevant, very short, no data lookup — i.e.
+        # a topic announcement) held back to merge into the next concept instead
+        # of emitting a near-empty widget
+        self._pending: List[tuple[str, str, int]] = []
         self._emitted = 0
         self._line_counter = 0  # global utterance index, matches the transcript
+        # fingerprints of concepts already emitted, to suppress a later widget
+        # that would pull the exact same data (same sources + tickers)
+        self._emitted_fingerprints: set[tuple] = set()
 
     @staticmethod
     def _label(speaker: str) -> str:
@@ -301,13 +308,23 @@ class ConceptSegmenter:
 
     async def close(self) -> None:
         """Flush whatever concept is still buffered at end of stream."""
-        await self._flush()
+        await self._flush(force=True)
 
-    async def _flush(self) -> None:
-        text = self.current_text
-        line_indices = [i for _, _, i in self._buffer]
+    # A concept this short with NO data lookup is almost always a topic
+    # announcement (a client opening a subject before stating the actual
+    # request) rather than a standalone request — hold it and merge it into the
+    # next concept.
+    _PREAMBLE_MAX_WORDS = 12
+
+    async def _flush(self, *, force: bool = False) -> None:
+        # combine any held preamble with the freshly buffered concept
+        entries = self._pending + self._buffer
         self._buffer = []
+        if not entries:
+            return
+        text = self._format(entries)
         if not text:
+            self._pending = []
             return
         try:
             chunk, is_relevant = await self._extract(text)
@@ -317,13 +334,51 @@ class ConceptSegmenter:
             import sys
 
             print(f"[segmenter] extract failed, concept dropped: {e}", file=sys.stderr)
+            self._pending = []
             return
         if not is_relevant:
+            self._pending = []
             return  # greeting/pleasantry or off-topic — no trigger
+
+        # Carry a thin, data-less preamble forward so the substantive request
+        # that follows absorbs it (richer widget, preamble line still linked).
+        # Never carry twice in a row, and never on the final flush.
+        thin_preamble = (
+            not chunk.data_requests
+            and len(text.split()) < self._PREAMBLE_MAX_WORDS
+        )
+        if thin_preamble and not force and not self._pending:
+            self._pending = entries
+            return
+
+        self._pending = []
+
+        # Suppress a duplicate: same data sources + same tickers as a concept we
+        # already emitted means the same widget would reappear.
+        fp = self._fingerprint(chunk)
+        if fp is not None and fp in self._emitted_fingerprints:
+            return
+        if fp is not None:
+            self._emitted_fingerprints.add(fp)
+
         chunk.index = self._emitted
-        chunk.line_indices = line_indices
+        chunk.line_indices = [i for _, _, i in entries]
         self._emitted += 1
         await _maybe_await(self.on_trigger(chunk))
+
+    @staticmethod
+    def _fingerprint(chunk: ConceptChunk) -> tuple | None:
+        """Identity of a concept's retrieval plan: (sources, tickers). Two
+        concepts with the same fingerprint pull the same data -> redundant."""
+        sources = frozenset(r.source for r in chunk.data_requests)
+        tickers = frozenset(
+            str(r.filters.get("ticker", "")).lower()
+            for r in chunk.data_requests
+            if r.filters.get("ticker") and r.filters.get("ticker") != ALL_VALUE
+        )
+        if not sources:
+            return None
+        return (sources, tickers)
 
     async def _is_new_topic(self, current: str, recent: str, candidate: str) -> bool:
         resp = await self.client.chat.completions.create(
