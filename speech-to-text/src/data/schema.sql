@@ -55,3 +55,33 @@ CREATE TABLE IF NOT EXISTS market_movements (
     volume INTEGER CHECK(volume IS NULL OR volume >= 0),
     timestamp TEXT NOT NULL
 );
+
+-- Call history: one row per past relationship-manager <-> client call.
+-- transcript is the full text; sentiment/risk_signal/topics are first-class
+-- columns for trend queries; insights_json caches the computed post-call bundle.
+CREATE TABLE IF NOT EXISTS calls (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id INTEGER NOT NULL,
+    call_date TEXT NOT NULL,
+    duration_seconds INTEGER CHECK(duration_seconds IS NULL OR duration_seconds >= 0),
+    channel TEXT CHECK(channel IS NULL OR channel IN ('phone', 'video', 'in_person')),
+    transcript TEXT NOT NULL,
+    summary TEXT,
+    sentiment_score REAL CHECK(sentiment_score IS NULL OR (sentiment_score >= -1.0 AND sentiment_score <= 1.0)),
+    sentiment_label TEXT CHECK(sentiment_label IS NULL OR sentiment_label IN ('negative', 'neutral', 'positive')),
+    risk_signal TEXT CHECK(risk_signal IS NULL OR risk_signal IN ('conservative', 'moderate', 'aggressive')),
+    topics TEXT,
+    insights_json TEXT
+);
+
+-- Risk-profile snapshots over time: the canonical chartable series behind the
+-- "risk profile over time" trend and the behavioral-drift signal.
+CREATE TABLE IF NOT EXISTS risk_profile_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id INTEGER NOT NULL,
+    assessed_date TEXT NOT NULL,
+    risk_appetite TEXT NOT NULL CHECK(risk_appetite IN ('conservative', 'moderate', 'aggressive')),
+    risk_score REAL CHECK(risk_score IS NULL OR (risk_score >= 1.0 AND risk_score <= 10.0)),
+    source TEXT CHECK(source IS NULL OR source IN ('onboarding', 'call', 'review')),
+    note TEXT
+);

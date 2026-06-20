@@ -5,6 +5,7 @@ All filter parameters are optional. Multiple filters combine with AND logic.
 Invalid filter values are silently ignored.
 """
 
+import json
 import os
 import sqlite3
 from pathlib import Path
@@ -423,3 +424,159 @@ def search_news(
                 })
 
     return output
+
+
+def _loads(value):
+    """Best-effort parse of a JSON text column; returns None on empty/invalid."""
+    if not value:
+        return None
+    try:
+        return json.loads(value)
+    except (ValueError, TypeError):
+        return value
+
+
+# Light columns for call-history lists (excludes heavy transcript/insights_json).
+_CALL_LIST_COLUMNS = (
+    "id, customer_id, call_date, duration_seconds, channel, summary, "
+    "sentiment_score, sentiment_label, risk_signal, topics"
+)
+
+
+def get_calls(customer_id: int | None = None, limit: int = 50) -> list[dict]:
+    """Return call-history rows (light columns), ordered by call_date desc.
+
+    - customer_id: filter to one client (single-client demo uses id 1)
+    - limit: max results (default 50, clamped 1-200)
+
+    Excludes the full transcript and cached insights_json — use get_call() for
+    a single call's full payload. The topics column is parsed from JSON.
+    """
+    conn = _get_sqlite_connection()
+    try:
+        try:
+            limit = int(limit)
+        except (ValueError, TypeError):
+            limit = 50
+        limit = max(1, min(200, limit))
+
+        query = f"SELECT {_CALL_LIST_COLUMNS} FROM calls WHERE 1=1"
+        params = []
+
+        if customer_id is not None:
+            try:
+                query += " AND customer_id = ?"
+                params.append(int(customer_id))
+            except (ValueError, TypeError):
+                pass
+
+        query += " ORDER BY call_date DESC LIMIT ?"
+        params.append(limit)
+
+        cursor = conn.execute(query, params)
+        rows = [dict(row) for row in cursor.fetchall()]
+        for row in rows:
+            row["topics"] = _loads(row.get("topics")) or []
+        return rows
+    except sqlite3.OperationalError as e:
+        raise DataLayerError(f"SQLite database unavailable: {e}")
+    finally:
+        conn.close()
+
+
+def get_call(call_id: int) -> dict:
+    """Return a single call with full transcript and cached insights.
+
+    Returns {} if no row matches. The topics and insights_json columns are
+    parsed from JSON into Python objects.
+    """
+    conn = _get_sqlite_connection()
+    try:
+        try:
+            call_id = int(call_id)
+        except (ValueError, TypeError):
+            return {}
+        cursor = conn.execute("SELECT * FROM calls WHERE id = ?", [call_id])
+        row = cursor.fetchone()
+        if row is None:
+            return {}
+        result = dict(row)
+        result["topics"] = _loads(result.get("topics")) or []
+        result["insights"] = _loads(result.get("insights_json"))
+        return result
+    except sqlite3.OperationalError as e:
+        raise DataLayerError(f"SQLite database unavailable: {e}")
+    finally:
+        conn.close()
+
+
+def get_risk_history(customer_id: int | None = None) -> list[dict]:
+    """Return risk-profile snapshots ordered by assessed_date asc (chronological).
+
+    - customer_id: filter to one client (single-client demo uses id 1)
+
+    Ascending order so the result is directly chartable as a trend line.
+    """
+    conn = _get_sqlite_connection()
+    try:
+        query = "SELECT * FROM risk_profile_history WHERE 1=1"
+        params = []
+
+        if customer_id is not None:
+            try:
+                query += " AND customer_id = ?"
+                params.append(int(customer_id))
+            except (ValueError, TypeError):
+                pass
+
+        query += " ORDER BY assessed_date ASC"
+
+        cursor = conn.execute(query, params)
+        return [dict(row) for row in cursor.fetchall()]
+    except sqlite3.OperationalError as e:
+        raise DataLayerError(f"SQLite database unavailable: {e}")
+    finally:
+        conn.close()
+
+
+def save_call_insights(
+    call_id: int,
+    insights: dict | None = None,
+    *,
+    summary: str | None = None,
+    sentiment_score: float | None = None,
+    sentiment_label: str | None = None,
+    risk_signal: str | None = None,
+    topics: list | None = None,
+) -> None:
+    """Persist a computed insights bundle (and trend columns) onto a call row.
+
+    Only provided fields are written; existing values are kept otherwise
+    (COALESCE). `insights` and `topics` are JSON-serialized. Raises
+    DataLayerError if the call row does not exist or the DB is unavailable.
+    """
+    conn = _get_sqlite_connection()
+    try:
+        insights_json = json.dumps(insights) if insights is not None else None
+        topics_json = json.dumps(topics) if topics is not None else None
+        cursor = conn.execute(
+            """
+            UPDATE calls SET
+                insights_json   = COALESCE(?, insights_json),
+                summary         = COALESCE(?, summary),
+                sentiment_score = COALESCE(?, sentiment_score),
+                sentiment_label = COALESCE(?, sentiment_label),
+                risk_signal     = COALESCE(?, risk_signal),
+                topics          = COALESCE(?, topics)
+            WHERE id = ?
+            """,
+            [insights_json, summary, sentiment_score, sentiment_label,
+             risk_signal, topics_json, int(call_id)],
+        )
+        if cursor.rowcount == 0:
+            raise DataLayerError(f"No call with id {call_id} to update")
+        conn.commit()
+    except sqlite3.OperationalError as e:
+        raise DataLayerError(f"SQLite database unavailable: {e}")
+    finally:
+        conn.close()
