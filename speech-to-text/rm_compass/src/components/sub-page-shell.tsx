@@ -21,7 +21,7 @@ export function SubPageShell({
           Back
         </button>
         {eyebrow && (
-          <div className="text-[11px] uppercase tracking-[0.18em]" style={{ color: "#C9A84C" }}>
+          <div className="text-[11px] uppercase tracking-[0.18em]" style={{ color: "#7A7D88" }}>
             {eyebrow}
           </div>
         )}

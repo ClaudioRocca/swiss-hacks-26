@@ -10,7 +10,7 @@ export const Route = createFileRoute("/proposals")({
 const PROPOSALS = [
   {
     title: "Gold Allocation Proposal",
-    client: "Mr. Alessandro Ferretti",
+    client: "Dr. Maximilian Keller",
     amount: "CHF 210,000",
     sent: "Jun 20, 2026 · 11:48",
     status: "Awaiting client review",

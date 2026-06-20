@@ -127,7 +127,7 @@ function RootComponent() {
               <Outlet />
             </main>
           </div>
-          <Toaster theme="dark" position="bottom-right" />
+          <Toaster theme="light" position="bottom-right" />
         </CallSessionProvider>
       </CallStateProvider>
     </QueryClientProvider>

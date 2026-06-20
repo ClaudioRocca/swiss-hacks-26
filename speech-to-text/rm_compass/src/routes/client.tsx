@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SubPageShell, SHELL_CONSTANTS as C } from "../components/sub-page-shell";
 
 export const Route = createFileRoute("/client")({
-  head: () => ({ meta: [{ title: "Client Profile — Ferretti" }] }),
+  head: () => ({ meta: [{ title: "Client Profile — Keller" }] }),
   component: ClientProfilePage,
 });
 
@@ -21,12 +21,12 @@ const INTERACTIONS = [
 
 function ClientProfilePage() {
   return (
-    <SubPageShell eyebrow="Client Profile" title="Mr. Alessandro Ferretti" subtitle="Private wealth · Onboarded 2019">
+    <SubPageShell eyebrow="Client Profile" title="Dr. Maximilian Keller" subtitle="Private wealth · Onboarded 2019">
       <div className="grid grid-cols-12 gap-6">
         <Card className="col-span-5">
           <SectionTitle>Overview</SectionTitle>
           <dl className="space-y-3 text-sm">
-            <Field k="Full name" v="Alessandro Ferretti" />
+            <Field k="Full name" v="Maximilian Keller" />
             <Field k="AUM" v="CHF 4.2M" />
             <Field k="Risk profile" v="Moderate-Conservative" />
             <Field k="Residency" v="Milano, Italy" />

@@ -79,19 +79,15 @@
     border-color: var(--color-border);
   }
   html, body {
-    color: var(--color-foreground);
+    color: #141E55;
     font-family: var(--font-sans);
     font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
     min-height: 100%;
   }
+  /* Julius Bär: clean white/warm-paper canvas, navy ink. */
   body {
-    background-color: #0A1240;
-    background-image:
-      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201, 168, 76, 0.08), transparent 70%),
-      radial-gradient(ellipse 100% 80% at 50% 50%, rgba(60, 80, 180, 0.18), transparent 70%),
-      linear-gradient(180deg, #0A1240 0%, #141E55 100%);
-    background-attachment: fixed;
+    background-color: #FFFFFF;
   }
 }
 
@@ -171,11 +167,11 @@
 
 .progress-flow {
   background: linear-gradient(90deg,
-    rgba(201,168,76,0) 0%,
-    rgba(201,168,76,0.9) 30%,
-    rgba(220,190,100,1) 50%,
-    rgba(201,168,76,0.9) 70%,
-    rgba(201,168,76,0) 100%);
+    rgba(20,30,85,0) 0%,
+    rgba(20,30,85,0.7) 30%,
+    rgba(20,30,85,1) 50%,
+    rgba(20,30,85,0.7) 70%,
+    rgba(20,30,85,0) 100%);
   background-size: 200% 100%;
   animation: progress-flow 2.4s linear infinite;
 }
