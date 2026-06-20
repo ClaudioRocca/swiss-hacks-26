@@ -1,0 +1,9 @@
+Client: Dr. Maximilian Keller
+Call type: portfolio review + market/news check
+---
+
+Good morning. Let's start with my UBS position. I saw the headlines that UBS just completed the final integration phase of the Credit Suisse wealth management operations, and I want to understand what that means for my holding. Could you pull up my current UBS position and tell me the unrealized profit or loss on it? While you're at it, please review the trades we executed on UBS over the last couple of weeks. I believe we did a couple of buy operations recently and I want to confirm the exact amounts. Also, can you find me the latest news on UBS and the Credit Suisse integration so I can read the details myself?
+
+Separately, I'd like to talk about my healthcare exposure. Novartis just reported stronger-than-expected first quarter results, and I've also been reading that Roche received an FDA breakthrough designation for its new Alzheimer's drug. Can you pull the latest news on both Novartis and Roche? On top of that, show me how Novartis and Roche shares moved today in the market, and give me my overall position in the healthcare sector so I can see whether I'm overweight there. I'm trying to decide if I should trim or add.
+
+One last thing, on the real estate side. I'm thinking about our commercial property strategy. Can you pull up my active commercial real estate investments, especially anything in Geneva, with a current value up to ten million? I recall we hold a commercial building on Rue du Rhône and I want to review its current valuation. And finally, given all the talk about chip supply, could you check the latest news on ASML and the semiconductor backlog? If the technology outlook looks strong I might want to rotate some capital that way before the weekend.

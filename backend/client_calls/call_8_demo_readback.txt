@@ -1,0 +1,62 @@
+Client: Dr. Maximilian Keller
+Relationship Manager: Sofia Lambro
+Call type: portfolio review — RM reads the surfaced data back to the client (demo)
+---
+
+RM: Good morning, Dr. Keller. Lovely to hear from you.
+
+Client: Morning, Sofia! Good to hear your voice. Before we get to business — I'm a grandfather now, if you can believe it. Little Emma arrived in April. It changes how you look at everything, Sofia; you start thinking less about the next quarter and more about the next generation. Truth be told, I find myself wanting a steadier, more cautious hand on things from here on.
+
+RM: Congratulations, Dr. Keller — that is wonderful news. And understood; we'll keep a careful eye on risk.
+
+Client: Thank you, Sofia. Right, to business — let's begin with UBS: pull up my UBSG holding and tell me where the unrealized profit or loss is sitting today.
+
+RM: Of course, let me pull that up for you.
+
+RM: Here it is on my screen: you hold 2,000 shares of UBSG at CHF 28.35, in the financials sector. That's an unrealized gain of CHF 7,100.
+
+Client: Ha — better than my golf handicap, at least. While you've got it open, humour an old man: confirm the UBS buy trades we made this month, I'd like the exact figures.
+
+RM: One moment, let me bring up your trade history.
+
+RM: I can see two buy operations on UBSG: 500 shares for CHF 14,175 on the 19th of May, and 400 shares for CHF 9,920 on the 10th of May.
+
+Client: Splendid. I really ought to fret less and trust the team, but I can't help myself — find me the latest news on UBS and the Credit Suisse integration.
+
+RM: Let me search the latest coverage for you.
+
+RM: The top result is from NZZ: UBS has completed the final integration phase of the Credit Suisse wealth management operations, and the merged entity now manages over CHF 5 trillion. I can open the full article on your end.
+
+Client: Fascinating times. Now let's change tack to something close to the heart — quite literally, at my age. Show me my positions in the healthcare sector so I can see how exposed I am.
+
+RM: Certainly, pulling up your healthcare holdings now.
+
+RM: You hold two healthcare names: 800 shares of NOVN at CHF 91.45, sitting on a gain of CHF 7,320, and 350 shares of ROP at CHF 258.90, up CHF 4,655.
+
+Client: A tidy pair. And how did Novartis and Roche move on the market today? I caught a flash on the television last night, but I'd had a glass of Barolo and wasn't paying proper attention.
+
+RM: Let me check today's price movements.
+
+RM: Today Novartis is down 1.67 percent and Roche is up 1.49 percent.
+
+Client: One up, one down — the story of my life, really. Is there any fresh news on Novartis or Roche? Something must be driving it.
+
+RM: Searching the latest now.
+
+RM: Two headlines: Bloomberg reports Novartis posted stronger-than-expected first quarter results with core operating income up 15 percent. And the Financial Times reports Roche's new Alzheimer's drug received FDA breakthrough designation, with Phase 3 data showing a 35 percent reduction in cognitive decline.
+
+Client: Encouraging news indeed — my old bridge partner would have given anything for that. One last thing before I let you go, Sofia: pull up my active commercial property in Geneva. I keep going back and forth on whether to hold it.
+
+RM: Let me filter your active commercial holdings in Geneva.
+
+RM: I see one active commercial property: the building on Rue du Rhône in Geneva, with a current valuation of CHF 8.5 million.
+
+Client: That old building has been good to me. And finally — my son lectures me about GPUs at every Sunday lunch, so I'm rather obliged to ask: what's the latest news on NVIDIA and the demand for its chips?
+
+RM: Pulling the most recent NVIDIA coverage now.
+
+RM: Bloomberg reports NVIDIA posted record data-center GPU demand as the AI buildout accelerates, with quarterly revenue up 78 percent year over year. For reference, you currently hold 400 NVDA shares at USD 145.
+
+Client: Wonderful — thank you so much, Sofia, that's everything for today. You've been a gem, as always; do give my regards to the team.
+
+RM: My pleasure, Dr. Keller. I'll send a written summary right after the call.

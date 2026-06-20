@@ -1,0 +1,27 @@
+.DS_Store
+
+# secrets
+.env
+*.env
+!.env.example
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# databases
+backend/data/chroma/
+backend/data/*.db
+
+# pipeline results
+backend/results/
+backend/pipeline_results.json
+
+# docker
+docker-compose.override.yml
+
+# frontend
+frontend/node_modules/
+frontend/dist/
