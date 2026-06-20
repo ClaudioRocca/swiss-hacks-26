@@ -77,10 +77,22 @@ DATA_SOURCES = [
 _STR = {"type": ["string", "null"]}
 _NUM = {"type": ["number", "null"]}
 
+# Explicit "return everything for this field" sentinel. Both ALL_VALUE and null
+# mean no restriction; the sentinel lets the LLM state that intent first-class.
+ALL_VALUE = "all"
+
 
 def _nullable_enum(values: list[str], description: str) -> dict:
-    """Nullable enum field for strict structured outputs (null is a valid value)."""
-    return {"type": ["string", "null"], "enum": [*values, None], "description": description}
+    """Nullable enum for strict structured outputs.
+
+    Includes the ALL_VALUE sentinel and null — both mean 'no filter, return
+    every row'. The model picks ALL_VALUE when the client wants all of them.
+    """
+    return {
+        "type": ["string", "null"],
+        "enum": [*values, ALL_VALUE, None],
+        "description": f"{description}. Use '{ALL_VALUE}' (or null) to return every value.",
+    }
 
 
 # Enum values mirror db.py validation sets exactly — keep in sync with src/data/db.py.
@@ -88,8 +100,17 @@ _FILTERS_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
     "properties": {
-        "ticker": {**_STR, "description": "stock ticker symbol, e.g. NESN, AAPL"},
-        "sector": _STR,
+        "ticker": {
+            **_STR,
+            "description": (
+                "stock ticker symbol, e.g. NESN, AAPL. Use 'all' (or null) for every "
+                "holding/ticker."
+            ),
+        },
+        "sector": {
+            **_STR,
+            "description": "sector name. Use 'all' (or null) for every sector.",
+        },
         "operation_type": _nullable_enum(
             ["buy", "sell", "short_sell", "short_cover"],
             "trades: type of trade operation",
@@ -104,7 +125,10 @@ _FILTERS_SCHEMA = {
         "status": _nullable_enum(
             ["active", "sold", "under_contract"], "real_estate: investment status"
         ),
-        "location": _STR,
+        "location": {
+            **_STR,
+            "description": "property location. Use 'all' (or null) for every location.",
+        },
         "category": _nullable_enum(
             ["macro", "equity", "geopolitical", "real_estate"],
             "news: article category",
@@ -149,9 +173,13 @@ _EXTRACT_SCHEMA = {
         "is_relevant": {
             "type": "boolean",
             "description": (
-                "false => DISCARD this slice (no trigger): a pure greeting/"
-                "pleasantry, or off-topic small talk unrelated to financial/banking/"
-                "investment work. true ONLY if it carries a substantive work concept."
+                "true if this slice carries ANY substantive financial/banking concept "
+                "or client request — investments, portfolio, trades, fraud, payments, "
+                "standing orders, transfers, mortgages, accounts, real estate, market/"
+                "news. This is independent of whether a data source applies: a valid "
+                "request with NO matching data source is still relevant (data_requests "
+                "may be empty). false ONLY for pure greetings/pleasantries or personal "
+                "small talk (weather, sports, family chit-chat)."
             ),
         },
         "topic": {"type": "string", "description": "2-5 word concept label"},
@@ -199,6 +227,12 @@ class ConceptSegmenter:
     def current_text(self) -> str:
         return " ".join(self._buffer).strip()
 
+    @property
+    def recent_text(self) -> str:
+        """The tail of the current concept — what the new utterance most likely
+        continues or pivots from. Avoids a long buffer drowning a clear shift."""
+        return " ".join(self._buffer[-2:]).strip()
+
     async def add_final(self, utterance: str) -> None:
         """Feed one finalized utterance. May emit a trigger for the prior concept."""
         utterance = utterance.strip()
@@ -209,7 +243,7 @@ class ConceptSegmenter:
             self._buffer.append(utterance)
             return
 
-        if await self._is_new_topic(self.current_text, utterance):
+        if await self._is_new_topic(self.current_text, self.recent_text, utterance):
             await self._flush()
 
         self._buffer.append(utterance)
@@ -230,7 +264,7 @@ class ConceptSegmenter:
         self._emitted += 1
         await _maybe_await(self.on_trigger(chunk))
 
-    async def _is_new_topic(self, current: str, candidate: str) -> bool:
+    async def _is_new_topic(self, current: str, recent: str, candidate: str) -> bool:
         resp = await self.client.chat.completions.create(
             model=self.model,
             temperature=0,
@@ -248,26 +282,42 @@ class ConceptSegmenter:
                     "role": "system",
                     "content": (
                         "You are the assistant of a relationship manager in a private "
-                        "bank. You segment a live transcript of a conversation between a "
-                        "wealthy client and their relationship manager into distinct "
-                        "concepts. The concepts that matter are financial, investment, "
-                        "and banking-related work topics (e.g. transactions, fraud, "
-                        "mortgages, payments, portfolio, accounts).\n"
-                        "Given the CURRENT concept so far and the NEXT utterance, decide "
-                        "if the next utterance starts a clearly different topic/concept. "
-                        "Minor elaboration or follow-up is NOT a new topic.\n"
-                        "RULE: a greeting/pleasantry (e.g. 'hello, how are you', "
-                        "'thanks, bye') is ALWAYS its own segment — if CURRENT is only "
-                        "a greeting/pleasantry and NEXT carries any real content, that "
-                        "IS a new topic. Likewise NEXT being a greeting is a boundary.\n"
-                        "RULE: a shift from a work/financial topic to off-topic small "
-                        "talk (or vice versa) is also a boundary — segment them apart so "
-                        "the off-topic part can be discarded downstream."
+                        "bank. You segment a live transcript between a wealthy client and "
+                        "their relationship manager into distinct concepts. Concepts that "
+                        "matter are financial/banking work topics (transactions, fraud, "
+                        "mortgages, payments, portfolio, accounts, real estate, news).\n"
+                        "You receive the CONCEPT so far, its most RECENT lines, and the "
+                        "NEXT utterance. Decide if NEXT starts a different concept.\n"
+                        "Each distinct client request, question, or instruction is its "
+                        "OWN concept — a portfolio review, a fraud report, a mortgage "
+                        "question, and a payment/standing-order setup are FOUR separate "
+                        "concepts even in one breath, even if all are 'banking'. Two "
+                        "requests are the same concept ONLY when the second is genuine "
+                        "elaboration of the first (more detail or a clarifying follow-up "
+                        "about the very same subject). Different subject or a new action "
+                        "verb (set up, arrange, transfer, open, close, file, review, buy, "
+                        "sell) => new concept.\n"
+                        "DECISIVE boundary signal: explicit discourse markers that "
+                        "announce a shift — 'also', 'separately', 'another thing', 'one "
+                        "last thing', 'on a different topic', 'next', 'finally', 'by the "
+                        "way', 'while I have you'. If NEXT opens with any such marker, "
+                        "treat it as a NEW concept unless it is plainly still about the "
+                        "exact same subject.\n"
+                        "RULE: a greeting/pleasantry ('hello, how are you', 'thanks, "
+                        "bye') is ALWAYS its own segment.\n"
+                        "RULE: a shift between a work topic and off-topic small talk is "
+                        "also a boundary.\n"
+                        "When genuinely unsure, prefer is_new_topic=true — missing a "
+                        "distinct intent is worse than over-splitting."
                     ),
                 },
                 {
                     "role": "user",
-                    "content": f"CURRENT:\n{current}\n\nNEXT:\n{candidate}",
+                    "content": (
+                        f"CONCEPT SO FAR:\n{current}\n\n"
+                        f"RECENT LINES:\n{recent}\n\n"
+                        f"NEXT:\n{candidate}"
+                    ),
                 },
             ],
         )
@@ -277,10 +327,22 @@ class ConceptSegmenter:
     async def _extract(self, text: str) -> tuple[ConceptChunk, bool]:
         # NOTE: returns (chunk, is_relevant). chunk carries semantics + a
         # retrieval plan (data_requests) — the plan is NOT executed here.
+        # The model occasionally returns a truncated/invalid JSON body; retry a
+        # couple of times before giving up rather than crash the whole stream.
+        last_err: Exception | None = None
+        for _attempt in range(3):
+            try:
+                return await self._extract_once(text)
+            except (json.JSONDecodeError, KeyError) as e:
+                last_err = e
+        raise last_err  # type: ignore[misc]
+
+    async def _extract_once(self, text: str) -> tuple[ConceptChunk, bool]:
         resp = await self.client.chat.completions.create(
             model=self.model,
             temperature=0,
             seed=self.seed,
+            max_tokens=4096,
             response_format={
                 "type": "json_schema",
                 "json_schema": {
@@ -300,9 +362,12 @@ class ConceptSegmenter:
                         "You support a private-bank relationship manager during a live "
                         "client call. For this transcript slice, do TWO things:\n"
                         "1) Extract the core concept (topic, summary, the client's "
-                        "intent, entities). Set is_relevant=false if it is a "
-                        "greeting/pleasantry or off-topic small talk unrelated to "
-                        "financial/banking/investment work (it will be discarded).\n"
+                        "intent, entities). Set is_relevant=false ONLY for a pure "
+                        "greeting/pleasantry or personal small talk (weather, sports, "
+                        "family). ANY financial/banking request is relevant — including "
+                        "payments, standing orders, and transfers — even if no data "
+                        "source below applies (leave data_requests empty in that case). "
+                        "Relevance does NOT depend on a data source being available.\n"
                         "2) Build data_requests: a plan of which back-office data "
                         "sources the RM should pull to address this concept, and the "
                         "filters to apply. Available sources and their filters:\n"
@@ -315,9 +380,12 @@ class ConceptSegmenter:
                         "  - news: news_query (required), top_k, category, ticker\n"
                         "Only set filters relevant to each chosen source; leave the rest "
                         "null. Map spoken references to concrete values (company name -> "
-                        "ticker, e.g. 'Nestle' -> NESN). Use multiple sources when "
-                        "useful. Leave data_requests empty if no lookup is needed. If "
-                        "is_relevant is false, data_requests must be empty."
+                        "ticker, e.g. 'Nestle' -> NESN). When the client wants everything "
+                        "in a category (e.g. 'show me all my properties', 'my whole "
+                        "portfolio'), set that filter to 'all' to return every row. Use "
+                        "multiple sources when useful. Leave data_requests empty if no "
+                        "lookup is needed. If is_relevant is false, data_requests must be "
+                        "empty."
                     ),
                 },
                 {"role": "user", "content": text},
