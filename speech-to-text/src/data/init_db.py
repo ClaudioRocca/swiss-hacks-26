@@ -6,6 +6,7 @@ Drops and recreates all SQLite tables and the ChromaDB market_news collection,
 then inserts realistic mock data for a Swiss high-net-worth client demo.
 """
 
+import json
 import os
 import sys
 import sqlite3
@@ -211,6 +212,30 @@ NEWS_ARTICLES = [
     },
 ]
 
+# Past relationship-manager <-> client calls. Fill in by hand. Each dict:
+#   customer_id       int   (optional, default 1)
+#   call_date         str   REQUIRED, ISO 8601, e.g. "2025-05-26T10:00:00Z" (sorted desc as history)
+#   duration_seconds  int   (optional, >= 0)
+#   channel           str   (optional, one of: phone, video, in_person)
+#   transcript        str   REQUIRED, full call text (what the pipeline will segment)
+#   summary           str   (optional, leave None — normally computed post-call)
+#   sentiment_score   float (optional, -1.0..1.0, leave None — normally computed)
+#   sentiment_label   str   (optional, one of: negative, neutral, positive — normally computed)
+#   risk_signal       str   (optional, one of: conservative, moderate, aggressive — risk appetite expressed in this call)
+#   topics            list[str] (optional, short topic labels; stored as a JSON-string column)
+CALLS: list[dict] = [
+]
+
+# Risk-profile snapshots over time (the chartable trend). Fill in by hand. Each dict:
+#   customer_id    int   (optional, default 1)
+#   assessed_date  str   REQUIRED, "YYYY-MM-DD" or ISO 8601 (sorted asc for charting)
+#   risk_appetite  str   REQUIRED, one of: conservative, moderate, aggressive
+#   risk_score     float (optional, 1.0..10.0, numeric value for the trend line)
+#   source         str   (optional, one of: onboarding, call, review)
+#   note           str   (optional, free-text context)
+RISK_PROFILE_HISTORY: list[dict] = [
+]
+
 
 def _init_sqlite() -> dict[str, int]:
     """Drop and recreate all SQLite tables, insert mock data. Returns record counts."""
@@ -221,7 +246,8 @@ def _init_sqlite() -> dict[str, int]:
     conn = sqlite3.connect(_SQLITE_PATH)
     try:
         # Drop existing tables
-        tables = ["market_movements", "real_estate_investments", "trade_operations", "portfolio", "customer_profile"]
+        tables = ["calls", "risk_profile_history", "market_movements",
+                  "real_estate_investments", "trade_operations", "portfolio", "customer_profile"]
         for table in tables:
             conn.execute(f"DROP TABLE IF EXISTS {table}")
         conn.commit()
@@ -275,11 +301,51 @@ def _init_sqlite() -> dict[str, int]:
                 movement,
             )
 
+        # Insert call history (CALLS — filled in by hand above).
+        # `topics` is a list but stored as a JSON-string column.
+        for call in CALLS:
+            topics = call.get("topics")
+            conn.execute(
+                """INSERT INTO calls (customer_id, call_date, duration_seconds, channel,
+                   transcript, summary, sentiment_score, sentiment_label, risk_signal, topics)
+                   VALUES (:customer_id, :call_date, :duration_seconds, :channel,
+                   :transcript, :summary, :sentiment_score, :sentiment_label, :risk_signal, :topics)""",
+                {
+                    "customer_id": call.get("customer_id", 1),
+                    "call_date": call["call_date"],
+                    "duration_seconds": call.get("duration_seconds"),
+                    "channel": call.get("channel"),
+                    "transcript": call["transcript"],
+                    "summary": call.get("summary"),
+                    "sentiment_score": call.get("sentiment_score"),
+                    "sentiment_label": call.get("sentiment_label"),
+                    "risk_signal": call.get("risk_signal"),
+                    "topics": json.dumps(topics) if isinstance(topics, (list, dict)) else topics,
+                },
+            )
+
+        # Insert risk-profile history (RISK_PROFILE_HISTORY — filled in by hand above).
+        for snapshot in RISK_PROFILE_HISTORY:
+            conn.execute(
+                """INSERT INTO risk_profile_history (customer_id, assessed_date, risk_appetite,
+                   risk_score, source, note)
+                   VALUES (:customer_id, :assessed_date, :risk_appetite, :risk_score, :source, :note)""",
+                {
+                    "customer_id": snapshot.get("customer_id", 1),
+                    "assessed_date": snapshot["assessed_date"],
+                    "risk_appetite": snapshot["risk_appetite"],
+                    "risk_score": snapshot.get("risk_score"),
+                    "source": snapshot.get("source"),
+                    "note": snapshot.get("note"),
+                },
+            )
+
         conn.commit()
 
         # Get record counts
         counts = {}
-        for table in ["customer_profile", "portfolio", "real_estate_investments", "trade_operations", "market_movements"]:
+        for table in ["customer_profile", "portfolio", "real_estate_investments",
+                      "trade_operations", "market_movements", "calls", "risk_profile_history"]:
             cursor = conn.execute(f"SELECT COUNT(*) FROM {table}")
             counts[table] = cursor.fetchone()[0]
 
