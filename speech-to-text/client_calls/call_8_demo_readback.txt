@@ -51,12 +51,12 @@ RM: Let me filter your active commercial holdings in Geneva.
 
 RM: I see one active commercial property: the building on Rue du Rhône in Geneva, with a current valuation of CHF 8.5 million.
 
-Client: That old building has been good to me. And finally — my grandson lectures me about GPUs at every Sunday lunch, so I'm rather obliged to ask: what's the latest news on NVIDIA and the demand for its chips?
+Client: That old building has been good to me. And finally — my son lectures me about GPUs at every Sunday lunch, so I'm rather obliged to ask: what's the latest news on NVIDIA and the demand for its chips?
 
 RM: Pulling the most recent NVIDIA coverage now.
 
 RM: Bloomberg reports NVIDIA posted record data-center GPU demand as the AI buildout accelerates, with quarterly revenue up 78 percent year over year. For reference, you currently hold 400 NVDA shares at USD 145.
 
-Client: Wonderful — that's the lot, Sofia. You've been a gem, as always; do give my regards to the team.
+Client: Wonderful — thank you so much, Sofia, that's everything for today. You've been a gem, as always; do give my regards to the team.
 
 RM: My pleasure, Dr. Keller. I'll send a written summary right after the call.
