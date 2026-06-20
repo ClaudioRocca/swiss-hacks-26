@@ -4,10 +4,12 @@ import os
 import sqlite3
 import tempfile
 
-sys.path.insert(0, ".")
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Create a temp db with the schema
-with open("src/data/schema.sql", "r") as f:
+schema_path = Path(__file__).parent.parent / "src" / "data" / "schema.sql"
+with open(schema_path, "r") as f:
     schema = f.read()
 
 tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
