@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar } from "../components/app-sidebar";
 import { Toaster } from "../components/ui/sonner";
 import { CallStateProvider } from "../lib/call-state";
+import { CallSessionProvider } from "../lib/call-session";
 
 function NotFoundComponent() {
   return (
@@ -119,13 +120,15 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <CallStateProvider>
-        <div className="flex min-h-screen w-full">
-          <AppSidebar />
-          <main className="flex-1 min-w-0">
-            <Outlet />
-          </main>
-        </div>
-        <Toaster theme="dark" position="bottom-right" />
+        <CallSessionProvider>
+          <div className="flex min-h-screen w-full">
+            <AppSidebar />
+            <main className="flex-1 min-w-0">
+              <Outlet />
+            </main>
+          </div>
+          <Toaster theme="dark" position="bottom-right" />
+        </CallSessionProvider>
       </CallStateProvider>
     </QueryClientProvider>
   );
