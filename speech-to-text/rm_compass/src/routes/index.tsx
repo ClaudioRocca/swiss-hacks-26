@@ -30,50 +30,13 @@ const LINE = "#E7E4DB";   // hairline border
 const STONE = "#F4F3EE";  // warm light-gray panel/card
 const MUTE = "#7A7D88";   // secondary text
 
-// Keywords to highlight in transcript
-const HIGHLIGHTS = [
-  "estate planning", "real estate", "allocation", "portfolio",
-  "gold", "Dubai", "ETF", "CHF", "exposure", "short", "Nestlé",
-  "semiconductor", "geopolitical", "volatile", "safer assets",
-  "commercial property", "Zurich", "Geneva",
-];
-
 function highlight(text: string) {
+  // Plain transcript — no keyword highlighting/underlining.
   const cleaned = text.replace(/\*\*/g, "");
-  let parts: Array<{ s: string; hl: boolean }> = [{ s: cleaned, hl: false }];
-  HIGHLIGHTS.forEach((term) => {
-    const next: typeof parts = [];
-    for (const p of parts) {
-      if (p.hl) { next.push(p); continue; }
-      let rest = p.s;
-      let lower = rest.toLowerCase();
-      let idx = lower.indexOf(term.toLowerCase());
-      while (idx !== -1) {
-        next.push({ s: rest.slice(0, idx), hl: false });
-        next.push({ s: rest.slice(idx, idx + term.length), hl: true });
-        rest = rest.slice(idx + term.length);
-        lower = rest.toLowerCase();
-        idx = lower.indexOf(term.toLowerCase());
-      }
-      next.push({ s: rest, hl: false });
-    }
-    parts = next.filter((p) => p.s.length > 0);
-  });
+  const parts: Array<{ s: string; hl: boolean }> = [{ s: cleaned, hl: false }];
   return parts.map((p, i) =>
     p.hl ? (
-      <mark
-        key={i}
-        style={{
-          background: "rgba(20,30,85,0.06)",
-          borderBottom: `1.5px solid ${NAVY}`,
-          borderRadius: 3,
-          padding: "1px 4px",
-          color: NAVY,
-          fontWeight: 500,
-        }}
-      >
-        {p.s}
-      </mark>
+      <span key={i}>{p.s}</span>
     ) : (
       <span key={i}>{p.s}</span>
     ),

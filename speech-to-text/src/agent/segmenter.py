@@ -46,7 +46,7 @@ TICKER_MAP = {
     "Givaudan": "GIVN",
     "Apple": "AAPL",
     "Microsoft": "MSFT",
-    "ASML": "ASML",
+    "NVIDIA": "NVDA", "Nvidia": "NVDA",
 }
 _TICKER_MAP_HINT = ", ".join(f"{k} -> {v}" for k, v in TICKER_MAP.items())
 
@@ -380,7 +380,13 @@ class ConceptSegmenter:
             self._emitted_fingerprints.add(fp)
 
         chunk.index = self._emitted
-        chunk.line_indices = [i for _, _, i in entries]
+        # Link only from this concept's first CLIENT line onward. Leading RM
+        # lines here are the previous concept's trailing data read-back (it was
+        # already eager-flushed), so they must not be attributed to this widget.
+        first_client = next(
+            (k for k, (sp, _, _) in enumerate(entries) if sp == "client"), 0
+        )
+        chunk.line_indices = [i for _, _, i in entries[first_client:]]
         self._emitted += 1
         await _maybe_await(self.on_trigger(chunk))
 
