@@ -257,7 +257,15 @@ class ConceptSegmenter:
         self._buffer = []
         if not text:
             return
-        chunk, is_relevant = await self._extract(text)
+        try:
+            chunk, is_relevant = await self._extract(text)
+        except Exception as e:
+            # A flaky/truncated LLM extract must not kill a live audio stream;
+            # drop this one concept and keep going. (Retried inside _extract.)
+            import sys
+
+            print(f"[segmenter] extract failed, concept dropped: {e}", file=sys.stderr)
+            return
         if not is_relevant:
             return  # greeting/pleasantry or off-topic — no trigger
         chunk.index = self._emitted

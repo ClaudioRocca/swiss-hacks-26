@@ -1,19 +1,25 @@
-"""Full pipeline E2E: conversation -> concept segmentation -> intent/plan
-extraction -> QUERY EXECUTION against the data layer.
+"""Full pipeline E2E: AUDIO call -> live STT -> concept segmentation ->
+intent/plan extraction -> QUERY EXECUTION against the data layer.
 
-Unlike demo_text.py (which only *emits* the retrieval plan), this script also
-RUNS each planned DataRequest against src/data/db.py and collects the retrieved
-rows. It writes a JSON file with, for every concept, every executed query and
-its returned data, plus a human-readable console summary.
+The primary input is an audio file (the real use case): it is ffmpeg-decoded,
+transcribed in real time via the OpenAI Realtime API, segmented into concepts,
+and each concept's retrieval plan is RUN against src/data/db.py. A .txt/.md
+input takes the text-only path (skip audio+STT) — handy for fast, repeatable
+checks. Either way the output is identical: a JSON file with, per concept,
+every executed query and its retrieved rows, plus a console summary.
 
 Usage:
-    python run_pipeline_execute.py                                  # default call_4
-    python run_pipeline_execute.py client_calls/call_2_bank_support.txt
-    python run_pipeline_execute.py call.txt --out results.json --now 2025-05-26
+    python run_pipeline_execute.py call.mp3 --language en          # AUDIO (primary)
+    python run_pipeline_execute.py call.wav --out results.json
+    python run_pipeline_execute.py client_calls/call_4_wealth_management.txt  # text
+    python run_pipeline_execute.py call.mp3 --now 2025-05-26
+
+Audio needs ffmpeg + OPENAI_API_KEY. Input is treated as audio unless its
+extension is .txt/.md/.text.
 
 --now pins the date the extractor resolves spoken/relative dates against
-(e.g. "last month", "June 18"). It defaults to 2025-05-26 so relative dates in
-the scripted calls land inside the seeded data window (data is May 2025).
+(e.g. "last month", "June 18"). Defaults to 2025-05-26 so relative dates land
+inside the seeded data window (mock data is May 2025).
 """
 
 import argparse
@@ -34,9 +40,12 @@ try:
 except ImportError:
     pass
 
-from src.agent.segmenter import ConceptChunk, ConceptSegmenter
+from src.agent.segmenter import ConceptChunk
 from src.data import DataLayerError, db
-from src.orchestrator import split_utterances
+from src.orchestrator import run_file, run_text
+
+# Input is treated as AUDIO unless its extension is one of these (text scripts).
+_TEXT_EXTS = {".txt", ".md", ".text"}
 
 # "all" sentinel + null both mean "no filter". Drop them before calling db.py:
 # passing "all" to a free-string field LIKE-matches literally -> 0 rows.
@@ -153,12 +162,20 @@ def _execute(source: str, planned_filters: dict) -> dict:
     return record
 
 
-async def run(conversation: str, now: date) -> list[dict]:
-    """Segment the conversation, extract plans, execute every query.
+def _is_audio(path: str) -> bool:
+    """Audio unless the extension is a known text-script type."""
+    return Path(path).suffix.lower() not in _TEXT_EXTS
+
+
+async def run(path: str, now: date, *, language: str | None = None) -> list[dict]:
+    """Run the full pipeline over an input file, executing every planned query.
+
+    AUDIO files (mp3/wav/m4a/…) go through the live STT path (ffmpeg decode ->
+    OpenAI Realtime transcription -> segmenter). TEXT files (.txt/.md) skip
+    audio+STT and feed the script straight in. Both emit the same ConceptChunk
+    into the same executor, so the output shape is identical.
 
     Returns a list of concept records (semantics + executed queries).
-    Built directly on ConceptSegmenter so we control the `now` date the
-    extractor resolves relative dates against.
     """
     concepts: list[dict] = []
 
@@ -179,16 +196,18 @@ async def run(conversation: str, now: date) -> list[dict]:
             }
         )
 
-    segmenter = ConceptSegmenter(on_trigger, now=now)
-    for utt in split_utterances(conversation):
-        try:
-            await segmenter.add_final(utt)
-        except Exception as e:  # one flaky LLM concept shouldn't sink the run
-            print(f"  ! skipped a concept (extract failed): {e}", file=sys.stderr)
-    try:
-        await segmenter.close()
-    except Exception as e:
-        print(f"  ! trailing concept flush failed: {e}", file=sys.stderr)
+    def on_final(utt: str) -> None:  # echo finalized STT lines for live visibility
+        print(f"  …{utt}", file=sys.stderr)
+
+    if _is_audio(path):
+        # Live audio pipeline: STT -> segmenter -> executor.
+        await run_file(
+            path, on_trigger=on_trigger, on_final=on_final, language=language, now=now
+        )
+    else:
+        # Text-only pipeline: skip audio+STT.
+        await run_text(Path(path).read_text(), on_trigger=on_trigger, now=now)
+
     return concepts
 
 
@@ -216,9 +235,13 @@ async def main() -> int:
         "path",
         nargs="?",
         default="client_calls/call_4_wealth_management.txt",
-        help="conversation .txt file (default: call_4)",
+        help="audio file (mp3/wav/m4a/…) — the primary input. A .txt/.md file "
+        "uses the text-only path instead. Default: call_4 text script.",
     )
     p.add_argument("--out", default="pipeline_results.json", help="JSON output path")
+    p.add_argument(
+        "--language", default=None, help="ISO-639-1 STT hint for audio, e.g. en"
+    )
     p.add_argument(
         "--now",
         default="2025-05-26",
@@ -230,17 +253,18 @@ async def main() -> int:
         print(f"error: file not found: {args.path}", file=sys.stderr)
         return 1
 
-    conversation = Path(args.path).read_text()
     now = date.fromisoformat(args.now)
+    mode = "audio (STT)" if _is_audio(args.path) else "text"
 
-    print(f"conversation: {args.path}")
+    print(f"input: {args.path}  [{mode}]")
     print(f"resolving dates against: {now.isoformat()}")
-    print("running segmentation + extraction + query execution...")
+    print("running transcription + segmentation + extraction + query execution...")
 
-    concepts = await run(conversation, now)
+    concepts = await run(args.path, now, language=args.language)
 
     payload = {
-        "conversation_file": args.path,
+        "input_file": args.path,
+        "input_mode": mode,
         "resolved_date": now.isoformat(),
         "concept_count": len(concepts),
         "query_count": sum(len(c["executed_queries"]) for c in concepts),

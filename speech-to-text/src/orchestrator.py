@@ -14,6 +14,7 @@ the segmenter as if STT had finalized those utterances — for fast stress tests
 from __future__ import annotations
 
 import re
+from datetime import date
 from typing import Iterable, List, Optional
 
 from .agent.segmenter import ConceptSegmenter, TriggerCb
@@ -29,6 +30,7 @@ async def run_file(
     on_final: Optional[PartialCb] = None,
     language: str | None = None,
     realtime: bool = True,
+    now: date | None = None,
 ) -> None:
     """Run the full live pipeline over an audio file.
 
@@ -39,8 +41,10 @@ async def run_file(
         on_final: optional, called with each finalized utterance (raw STT).
         language: optional ISO-639-1 hint.
         realtime: pace audio like a live mic (True) or push as fast as possible.
+        now: date the extractor resolves spoken/relative dates against
+            (default today); pin it to align with a fixed data window.
     """
-    segmenter = ConceptSegmenter(on_trigger)
+    segmenter = ConceptSegmenter(on_trigger, now=now)
 
     async def handle_final(text: str) -> None:
         if on_final:
@@ -59,13 +63,16 @@ async def run_utterances(
     *,
     on_trigger: TriggerCb,
     on_final: Optional[PartialCb] = None,
+    now: date | None = None,
 ) -> None:
     """Feed pre-split utterances straight into the segmenter (no audio, no STT).
 
     Each string is treated as one finalized STT utterance. Use this to stress
     test segmentation + the structured-output plan on scripted text.
+
+    `now` pins the date the extractor resolves relative dates against.
     """
-    segmenter = ConceptSegmenter(on_trigger)
+    segmenter = ConceptSegmenter(on_trigger, now=now)
     for utt in utterances:
         utt = utt.strip()
         if not utt:
@@ -81,10 +88,11 @@ async def run_text(
     *,
     on_trigger: TriggerCb,
     on_final: Optional[PartialCb] = None,
+    now: date | None = None,
 ) -> None:
     """Same as run_utterances but splits raw text into sentence-ish utterances."""
     await run_utterances(
-        split_utterances(text), on_trigger=on_trigger, on_final=on_final
+        split_utterances(text), on_trigger=on_trigger, on_final=on_final, now=now
     )
 
 
