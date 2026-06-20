@@ -23,10 +23,12 @@ export const Route = createFileRoute("/")({
   component: LiveCallPage,
 });
 
-const GOLD = "#B8955A";
-const GOLD_TEXT = "#92681F";
 const NAVY = "#141E55";
 const TEXT = "#1A1A2E";
+// Julius Bär neutrals
+const LINE = "#E7E4DB";   // hairline border
+const STONE = "#F4F3EE";  // warm light-gray panel/card
+const MUTE = "#7A7D88";   // secondary text
 
 // Keywords to highlight in transcript
 const HIGHLIGHTS = [
@@ -62,11 +64,11 @@ function highlight(text: string) {
       <mark
         key={i}
         style={{
-          background: "linear-gradient(120deg, rgba(184,149,90,0.12) 0%, rgba(184,149,90,0.18) 100%)",
-          borderBottom: `1.5px solid ${GOLD}`,
+          background: "rgba(20,30,85,0.06)",
+          borderBottom: `1.5px solid ${NAVY}`,
           borderRadius: 3,
           padding: "1px 4px",
-          color: GOLD_TEXT,
+          color: NAVY,
           fontWeight: 500,
         }}
       >
@@ -395,24 +397,31 @@ function LiveCallPage() {
 
       {/* Header */}
       <header
-        className="shrink-0 flex items-center justify-between px-8 py-4 text-white"
-        style={{
-          background: "rgba(10, 18, 64, 0.98)",
-          borderBottom: "1px solid rgba(184,149,90,0.2)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
-        }}
+        className="shrink-0 flex items-center justify-between px-8 py-4"
+        style={{ background: "#FFFFFF", borderBottom: `1px solid ${LINE}` }}
       >
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-5">
           <div>
-            <div className="font-serif text-white" style={{ fontSize: 22 }}>Dr. Maximilian Keller</div>
+            <div className="text-[10px] font-medium uppercase tracking-[0.22em]" style={{ color: MUTE }}>
+              {isIdle ? "Ready" : isDone || callEnded ? "Call ended" : "Active call"}
+            </div>
+            <div className="font-serif" style={{ fontSize: 24, color: NAVY, lineHeight: 1.1 }}>Dr. Maximilian Keller</div>
           </div>
           {isDone || callEnded ? (
             <div
               className="inline-flex items-center gap-2 px-3 py-1"
-              style={{ border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.05)", borderRadius: 20 }}
+              style={{ border: `1px solid ${LINE}`, background: STONE, borderRadius: 20 }}
             >
-              <CheckCircle2 className="h-3 w-3 text-white/70" />
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-white/70">Call Ended</span>
+              <CheckCircle2 className="h-3 w-3" style={{ color: MUTE }} />
+              <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: MUTE }}>Call Ended</span>
+            </div>
+          ) : isLive ? (
+            <div
+              className="inline-flex items-center gap-2"
+              style={{ border: "1px solid #D4351C", color: "#D4351C", borderRadius: 20, padding: "4px 12px", fontSize: 11, letterSpacing: "0.1em", fontWeight: 600 }}
+            >
+              <span className="h-1.5 w-1.5 animate-blink rounded-full" style={{ background: "#D4351C" }} />
+              LIVE
             </div>
           ) : null}
         </div>
@@ -420,8 +429,8 @@ function LiveCallPage() {
           {isIdle && (
             <button
               onClick={handleStart}
-              className="press inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors"
-              style={{ background: GOLD, borderRadius: 10 }}
+              className="press inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-white transition-colors"
+              style={{ background: NAVY, borderRadius: 8 }}
             >
               <Play className="h-4 w-4" />
               Start Demo
@@ -430,9 +439,9 @@ function LiveCallPage() {
           {isLive && (
             <button
               onClick={handleEndCall}
-              className="press inline-flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors"
-              style={{ background: "transparent", border: "1px solid rgba(239,68,68,0.6)", color: "#ef4444", borderRadius: 10 }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239,68,68,0.1)")}
+              className="press inline-flex items-center gap-2 px-5 py-2 text-sm font-medium transition-colors"
+              style={{ background: "transparent", border: "1px solid rgba(212,53,28,0.5)", color: "#D4351C", borderRadius: 8 }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(212,53,28,0.06)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <PhoneOff className="h-4 w-4" />
@@ -442,8 +451,8 @@ function LiveCallPage() {
           {isDone && (
             <button
               onClick={() => navigate({ to: "/post-call" })}
-              className="press inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors"
-              style={{ background: GOLD, borderRadius: 10 }}
+              className="press inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-white transition-colors"
+              style={{ background: NAVY, borderRadius: 8 }}
             >
               View Report →
             </button>
@@ -500,7 +509,7 @@ function LiveCallPage() {
                     >
                       <span
                         className="text-[10px] font-semibold uppercase tracking-wider"
-                        style={{ color: isRM ? GOLD : "#6B7280" }}
+                        style={{ color: isRM ? NAVY : MUTE }}
                       >
                         {isRM ? "Relationship Manager" : "Client"}
                       </span>
@@ -512,11 +521,11 @@ function LiveCallPage() {
                       style={{
                         background: isFlashed
                           ? (cColor ? `${cColor}22` : undefined)
-                          : (isRM ? NAVY : "#FFFFFF"),
+                          : (isRM ? NAVY : STONE),
                         color: isFlashed ? "#1C1C2E" : (isRM ? "#FFFFFF" : "#1C1C2E"),
                         border: isFlashed && cColor
                           ? `1px solid ${cColor}`
-                          : (isRM ? "none" : "1px solid #E5E7EB"),
+                          : (isRM ? "none" : `1px solid ${LINE}`),
                         borderRadius: 16,
                         borderTopRightRadius: isRM ? 4 : 16,
                         borderTopLeftRadius: isRM ? 16 : 4,
@@ -544,14 +553,14 @@ function LiveCallPage() {
             {partial && (
               <div className="flex justify-start py-1.5 opacity-60">
                 <div className="max-w-[78%]">
-                  <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: "#6B7280" }}>
+                  <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: MUTE }}>
                     Client
                   </div>
                   <div
                     style={{
-                      background: "#FFFFFF",
+                      background: STONE,
                       color: "#1C1C2E",
-                      border: "1px solid #E5E7EB",
+                      border: `1px solid ${LINE}`,
                       borderRadius: 16,
                       borderTopLeftRadius: 4,
                       padding: "8px 12px",
@@ -568,11 +577,11 @@ function LiveCallPage() {
 
             {/* Listening indicator */}
             {isLive && (
-              <div className="flex items-center gap-2 pl-20 pt-3 text-xs" style={{ color: GOLD }}>
+              <div className="flex items-center gap-2 pl-20 pt-3 text-xs" style={{ color: MUTE }}>
                 <span className="inline-flex gap-1">
-                  <span className="bounce-dot h-1.5 w-1.5 rounded-full" style={{ background: GOLD, animationDelay: "0ms" }} />
-                  <span className="bounce-dot h-1.5 w-1.5 rounded-full" style={{ background: GOLD, animationDelay: "150ms" }} />
-                  <span className="bounce-dot h-1.5 w-1.5 rounded-full" style={{ background: GOLD, animationDelay: "300ms" }} />
+                  <span className="bounce-dot h-1.5 w-1.5 rounded-full" style={{ background: NAVY, animationDelay: "0ms" }} />
+                  <span className="bounce-dot h-1.5 w-1.5 rounded-full" style={{ background: NAVY, animationDelay: "150ms" }} />
+                  <span className="bounce-dot h-1.5 w-1.5 rounded-full" style={{ background: NAVY, animationDelay: "300ms" }} />
                 </span>
                 Listening…
               </div>
@@ -594,15 +603,15 @@ function LiveCallPage() {
 
         <ResizablePanel defaultSize={40} minSize={25}>
         {/* Widgets panel — dynamic from concepts */}
-        <aside className="flex h-full min-h-0 flex-col" style={{ background: NAVY }}>
-          <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.02] px-6 py-3">
-            <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/50">Contextual Intelligence</div>
+        <aside className="flex h-full min-h-0 flex-col" style={{ background: STONE }}>
+          <div className="flex items-center justify-between px-6 py-3" style={{ borderBottom: `1px solid ${LINE}`, background: "#FFFFFF" }}>
+            <div className="text-[11px] font-medium uppercase tracking-[0.18em]" style={{ color: MUTE }}>Contextual Intelligence</div>
             <div
               className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider"
               style={{
-                background: "rgba(184,149,90,0.08)",
-                color: GOLD,
-                border: "1px solid rgba(184,149,90,0.25)",
+                background: "#FFFFFF",
+                color: NAVY,
+                border: `1px solid ${LINE}`,
                 borderRadius: 20,
               }}
             >
@@ -621,11 +630,11 @@ function LiveCallPage() {
               />
             ))}
             {concepts.length === 0 && (
-              <div className="glass rounded-2xl p-8 text-center">
-                <div className="text-sm font-medium text-white/80">
+              <div className="rounded-2xl p-8 text-center" style={{ background: "#FFFFFF", border: `1px solid ${LINE}` }}>
+                <div className="text-sm font-medium" style={{ color: NAVY }}>
                   {isIdle ? "Waiting for call" : "Listening for intents…"}
                 </div>
-                <div className="mt-1 text-xs text-white/50">
+                <div className="mt-1 text-xs" style={{ color: MUTE }}>
                   Widgets appear when the AI detects actionable topics
                 </div>
               </div>
@@ -640,11 +649,11 @@ function LiveCallPage() {
           <>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={30} minSize={20}>
-              <section className="flex h-full min-h-0 flex-col" style={{ background: "#0F1629", borderLeft: "1px solid rgba(184,149,90,0.15)" }}>
+              <section className="flex h-full min-h-0 flex-col" style={{ background: "#FFFFFF", borderLeft: `1px solid ${LINE}` }}>
                 {/* Ticker tabs */}
-                <div className="flex items-center gap-1 overflow-x-auto border-b border-white/10 px-4 py-2">
-                  <TrendingUp className="h-3.5 w-3.5 shrink-0" style={{ color: GOLD }} />
-                  <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider mr-2" style={{ color: GOLD }}>
+                <div className="flex items-center gap-1 overflow-x-auto px-4 py-2" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <TrendingUp className="h-3.5 w-3.5 shrink-0" style={{ color: NAVY }} />
+                  <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider mr-2" style={{ color: MUTE }}>
                     Charts
                   </span>
                   {detectedTickers.map((ticker) => (
@@ -653,9 +662,9 @@ function LiveCallPage() {
                       onClick={() => setSelectedTicker(ticker)}
                       className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors"
                       style={{
-                        background: selectedTicker === ticker ? "rgba(184,149,90,0.15)" : "transparent",
-                        color: selectedTicker === ticker ? GOLD : "rgba(255,255,255,0.6)",
-                        border: selectedTicker === ticker ? `1px solid ${GOLD}` : "1px solid transparent",
+                        background: selectedTicker === ticker ? NAVY : "transparent",
+                        color: selectedTicker === ticker ? "#FFFFFF" : MUTE,
+                        border: selectedTicker === ticker ? `1px solid ${NAVY}` : `1px solid ${LINE}`,
                       }}
                     >
                       {ticker.includes(":") ? ticker.split(":")[1] : ticker}
@@ -665,7 +674,7 @@ function LiveCallPage() {
                 {/* Chart */}
                 <div className="flex-1 min-h-0">
                   {selectedTicker && (
-                    <TradingViewChart symbol={selectedTicker} theme="dark" />
+                    <TradingViewChart symbol={selectedTicker} theme="light" />
                   )}
                 </div>
               </section>
@@ -707,13 +716,13 @@ function ConceptWidget({
         background: "#FFFFFF",
         // colored top accent ties the widget to its transcript lines
         borderTop: `3px solid ${color}`,
-        border: `1px solid ${isFlashed ? color : "rgba(184,149,90,0.18)"}`,
+        border: `1px solid ${isFlashed ? color : LINE}`,
         borderTopWidth: 3,
         borderTopColor: color,
-        borderRadius: 18,
+        borderRadius: 14,
         boxShadow: isFlashed
-          ? `0 0 0 3px ${color}33, 0 8px 28px rgba(10,18,64,0.16)`
-          : "0 4px 24px rgba(10,18,64,0.07), 0 1px 4px rgba(10,18,64,0.04)",
+          ? `0 0 0 3px ${color}22, 0 8px 24px rgba(20,30,85,0.10)`
+          : "0 1px 2px rgba(20,30,85,0.04)",
         transform: isFlashed ? "scale(1.015)" : "scale(1)",
         transition: "all 300ms",
         cursor: "pointer",
@@ -731,7 +740,7 @@ function ConceptWidget({
           </div>
           <div>
             <div className="font-serif leading-tight" style={{ color: NAVY, fontSize: 15, fontWeight: 600 }}>{concept.topic}</div>
-            <div className="uppercase" style={{ color: GOLD, fontSize: 9, letterSpacing: "0.15em", fontWeight: 600 }}>
+            <div className="uppercase" style={{ color: MUTE, fontSize: 9, letterSpacing: "0.15em", fontWeight: 600 }}>
               {concept.entities.slice(0, 3).join(" · ") || primarySource}
             </div>
           </div>
@@ -746,7 +755,7 @@ function ConceptWidget({
         {concept.executed_queries.map((q, qi) => (
           <div key={qi}>
             {concept.executed_queries.length > 1 && (
-              <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider" style={{ color: GOLD }}>
+              <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider" style={{ color: NAVY }}>
                 {q.source.replace(/_/g, " ")} {q.result_count != null ? `(${q.result_count})` : ""}
               </div>
             )}

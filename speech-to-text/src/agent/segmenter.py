@@ -364,6 +364,13 @@ class ConceptSegmenter:
 
         self._pending = []
 
+        # Skip concepts that produce no useful live widget: ones with no data
+        # lookup at all, or purely risk-profile / customer-profile intents (e.g.
+        # "request for a cautious investment approach"). Risk re-assessment is
+        # handled in the post-call analysis, not as a live widget.
+        if all(r.source == "customer_profile" for r in chunk.data_requests):
+            return
+
         # Suppress a duplicate: same data sources + same tickers as a concept we
         # already emitted means the same widget would reappear.
         fp = self._fingerprint(chunk)
