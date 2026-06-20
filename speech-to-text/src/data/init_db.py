@@ -295,10 +295,11 @@ def _init_chromadb(openai_client: OpenAI) -> int:
 
     client = chromadb.PersistentClient(path=_CHROMA_PATH)
 
-    # Drop existing collection if it exists
+    # Drop existing collection if it exists.
+    # chromadb >=1.x raises NotFoundError (not ValueError) when it's absent.
     try:
         client.delete_collection(name=_COLLECTION_NAME)
-    except ValueError:
+    except Exception:
         pass  # Collection doesn't exist
 
     # Create fresh collection

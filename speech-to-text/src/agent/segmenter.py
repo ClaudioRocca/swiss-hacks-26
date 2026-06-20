@@ -252,33 +252,45 @@ class ConceptSegmenter:
         self.client = AsyncOpenAI(
             http_client=httpx.AsyncClient(verify=False),
         )
-        self._buffer: List[str] = []
+        # buffer holds (speaker, text) so the agent reads the labeled exchange
+        self._buffer: List[tuple[str, str]] = []
         self._emitted = 0
+
+    @staticmethod
+    def _label(speaker: str) -> str:
+        return "RM" if speaker == "rm" else "Client"
+
+    def _format(self, turns: List[tuple[str, str]]) -> str:
+        return "\n".join(f"{self._label(s)}: {t}" for s, t in turns).strip()
 
     @property
     def current_text(self) -> str:
-        return " ".join(self._buffer).strip()
+        """Full current concept, speaker-labeled (Client:/RM: per line)."""
+        return self._format(self._buffer)
 
     @property
     def recent_text(self) -> str:
         """The tail of the current concept — what the new utterance most likely
         continues or pivots from. Avoids a long buffer drowning a clear shift."""
-        return " ".join(self._buffer[-2:]).strip()
+        return self._format(self._buffer[-2:])
 
-    async def add_final(self, utterance: str) -> None:
-        """Feed one finalized utterance. May emit a trigger for the prior concept."""
+    async def add_final(self, utterance: str, speaker: str = "client") -> None:
+        """Feed one finalized utterance (with speaker). May emit a trigger for
+        the prior concept. Both client and RM lines are buffered so the agent
+        sees the two-way conversation."""
         utterance = utterance.strip()
         if not utterance:
             return
 
         if not self._buffer:
-            self._buffer.append(utterance)
+            self._buffer.append((speaker, utterance))
             return
 
-        if await self._is_new_topic(self.current_text, self.recent_text, utterance):
+        candidate = f"{self._label(speaker)}: {utterance}"
+        if await self._is_new_topic(self.current_text, self.recent_text, candidate):
             await self._flush()
 
-        self._buffer.append(utterance)
+        self._buffer.append((speaker, utterance))
 
     async def close(self) -> None:
         """Flush whatever concept is still buffered at end of stream."""
@@ -326,6 +338,15 @@ class ConceptSegmenter:
                         "their relationship manager into distinct concepts. Concepts that "
                         "matter are financial/banking work topics (transactions, fraud, "
                         "mortgages, payments, portfolio, accounts, real estate, news).\n"
+                        "Every line is labeled by speaker: 'Client:' (the customer) or "
+                        "'RM:' (the relationship manager). The CONCEPT is driven by the "
+                        "CLIENT's requests; the RM's lines are confirmations, "
+                        "acknowledgements ('Of course', 'Let me pull that up') or "
+                        "clarifying questions. An RM line that merely acknowledges or "
+                        "elaborates the SAME subject is NOT a new concept — keep it with "
+                        "the current one. A boundary is driven by the CLIENT moving to a "
+                        "new subject (or by an RM clarifying question that opens a clearly "
+                        "different subject).\n"
                         "You receive the CONCEPT so far, its most RECENT lines, and the "
                         "NEXT utterance. Decide if NEXT starts a different concept.\n"
                         "Each distinct client request, question, or instruction is its "
@@ -400,7 +421,14 @@ class ConceptSegmenter:
                         "says otherwise; 'last month', '3 days ago'). Output since/until "
                         "as YYYY-MM-DD.\n"
                         "You support a private-bank relationship manager during a live "
-                        "client call. For this transcript slice, do TWO things:\n"
+                        "client call. The transcript slice is labeled by speaker: "
+                        "'Client:' (the customer) and 'RM:' (the relationship manager). "
+                        "Read BOTH sides — the RM's confirmations and clarifying "
+                        "questions disambiguate what the client wants (e.g. RM naming a "
+                        "specific holding, ticker, or timeframe) — but the concept, "
+                        "intent, and data_requests must serve the CLIENT's need. Do not "
+                        "raise a data request for the RM's own small talk.\n"
+                        "For this transcript slice, do TWO things:\n"
                         "1) Extract the core concept (topic, summary, the client's "
                         "intent, entities). Set is_relevant=false ONLY for a pure "
                         "greeting/pleasantry or personal small talk (weather, sports, "

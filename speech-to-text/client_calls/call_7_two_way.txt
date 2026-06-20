@@ -1,0 +1,46 @@
+Client: Dr. Maximilian Keller
+Relationship Manager: Sophie Lambert
+Call type: portfolio review + market/news check (two-way)
+---
+
+RM: Good morning, Dr. Keller. Thank you for making the time. How can I help you today?
+
+Client: Morning, Sophie. Let's start with my UBS position. I saw the headlines that UBS just completed the final integration phase of the Credit Suisse wealth management operations, and I want to understand what that means for my holding.
+
+RM: Absolutely. Let me pull that up for you right now.
+
+Client: Could you tell me the current unrealized profit or loss on my UBS position? And while you're at it, please review the trades we executed on UBS over the last couple of weeks. I believe we did a couple of buy operations recently and I want to confirm the exact amounts.
+
+RM: Of course. I'm looking at your UBS holding and the recent trade history as we speak.
+
+Client: Also, can you find me the latest news on UBS and the Credit Suisse integration so I can read the details myself?
+
+RM: Done. I've surfaced the most relevant articles on the integration. You'll be able to open the full text on your end.
+
+Client: Perfect. Separately, I'd like to talk about my healthcare exposure. Novartis just reported stronger-than-expected first quarter results, and I've also been reading that Roche received an FDA breakthrough designation for its new Alzheimer's drug.
+
+RM: That's right, both have been in the news. Shall I pull the latest coverage on Novartis and Roche?
+
+Client: Yes, please. On top of that, show me how Novartis and Roche shares moved today in the market, and give me my overall position in the healthcare sector so I can see whether I'm overweight there.
+
+RM: Understood. I'm checking today's price movements for both names and aggregating your healthcare sector exposure now.
+
+Client: I'm trying to decide if I should trim or add. I don't want to be too concentrated.
+
+RM: That's a sensible concern. Once I have the numbers in front of us we can talk through whether a rebalance makes sense.
+
+Client: One last thing, on the real estate side. I'm thinking about our commercial property strategy. Can you pull up my active commercial real estate investments, especially anything in Geneva, with a current value up to ten million?
+
+RM: Certainly. Let me filter your active commercial holdings in the Geneva area.
+
+Client: I recall we hold a commercial building on Rue du Rhône and I want to review its current valuation.
+
+RM: I see it here. I'll bring up the latest valuation for that property.
+
+Client: And finally, given all the talk about chip supply, could you check the latest news on ASML and the semiconductor backlog? If the technology outlook looks strong I might want to rotate some capital that way before the weekend.
+
+RM: Good idea. I'll find the most recent ASML and semiconductor news so you can weigh that before we close out the week.
+
+Client: Thank you, Sophie. That covers everything for now.
+
+RM: My pleasure, Dr. Keller. I'll send a written summary right after the call.

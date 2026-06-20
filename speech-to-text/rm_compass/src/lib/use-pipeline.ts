@@ -21,6 +21,7 @@ const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:8000/ws";
 export type TranscriptLine = {
   text: string;
   timestamp: string; // HH:MM:SS derived from index
+  speaker: "client" | "rm";
 };
 
 export type ExecutedQuery = {
@@ -94,7 +95,11 @@ export function usePipeline() {
             setPartial("");
             setTranscriptLines((prev) => [
               ...prev,
-              { text: data.text, timestamp: formatTime(lineCountRef.current) },
+              {
+                text: data.text,
+                timestamp: formatTime(lineCountRef.current),
+                speaker: data.speaker === "rm" ? "rm" : "client",
+              },
             ]);
             lineCountRef.current += 1;
             break;

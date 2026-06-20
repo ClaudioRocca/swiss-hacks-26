@@ -196,8 +196,8 @@ async def run(path: str, now: date, *, language: str | None = None) -> list[dict
             }
         )
 
-    def on_final(utt: str) -> None:  # echo finalized STT lines for live visibility
-        print(f"  …{utt}", file=sys.stderr)
+    def on_final(utt: str, speaker: str = "client") -> None:  # echo finalized STT lines for live visibility
+        print(f"  …[{speaker}] {utt}", file=sys.stderr)
 
     if _is_audio(path):
         # Live audio pipeline: STT -> segmenter -> executor.

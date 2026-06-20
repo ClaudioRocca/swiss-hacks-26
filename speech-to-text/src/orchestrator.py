@@ -15,7 +15,11 @@ from __future__ import annotations
 
 import re
 from datetime import date
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Tuple, Union
+
+# An utterance is either a plain string (speaker unknown -> treated as client)
+# or a (speaker, text) tuple where speaker is "client" or "rm".
+Utterance = Union[str, Tuple[str, str]]
 
 from .agent.segmenter import ConceptSegmenter, TriggerCb
 from .realtime.audio import stream_file_as_pcm
@@ -47,9 +51,10 @@ async def run_file(
     segmenter = ConceptSegmenter(on_trigger, now=now)
 
     async def handle_final(text: str) -> None:
+        # Live audio is the client side of the call.
         if on_final:
-            await _maybe_await(on_final(text))
-        await segmenter.add_final(text)
+            await _maybe_await(on_final(text, "client"))
+        await segmenter.add_final(text, "client")
 
     transcriber = RealtimeTranscriber(language=language)
     audio = stream_file_as_pcm(path, realtime=realtime)
@@ -59,7 +64,7 @@ async def run_file(
 
 
 async def run_utterances(
-    utterances: Iterable[str],
+    utterances: Iterable[Utterance],
     *,
     on_trigger: TriggerCb,
     on_final: Optional[PartialCb] = None,
@@ -67,19 +72,26 @@ async def run_utterances(
 ) -> None:
     """Feed pre-split utterances straight into the segmenter (no audio, no STT).
 
-    Each string is treated as one finalized STT utterance. Use this to stress
-    test segmentation + the structured-output plan on scripted text.
+    Each item is either a plain string (treated as a client utterance) or a
+    (speaker, text) tuple. Every utterance — client AND relationship manager —
+    is fed to the segmenter WITH its speaker, so the agent reads the full
+    two-way exchange (the RM's confirmations/clarifications sharpen what data to
+    pull). `on_final` mirrors each line to the transcript with its speaker.
 
     `now` pins the date the extractor resolves relative dates against.
     """
     segmenter = ConceptSegmenter(on_trigger, now=now)
     for utt in utterances:
-        utt = utt.strip()
-        if not utt:
+        if isinstance(utt, tuple):
+            speaker, text = utt
+        else:
+            speaker, text = "client", utt
+        text = text.strip()
+        if not text:
             continue
         if on_final:
-            await _maybe_await(on_final(utt))
-        await segmenter.add_final(utt)
+            await _maybe_await(on_final(text, speaker))
+        await segmenter.add_final(text, speaker)
     await segmenter.close()
 
 
@@ -98,23 +110,52 @@ async def run_text(
 
 _MARKER_RE = re.compile(r"\[[^\]]*\]")           # [TOPIC SHIFT — ...]
 _SENTENCE_RE = re.compile(r"(?<=[.!?])\s+")        # split after . ! ?
+# Speaker prefix at the start of a line, e.g. "Client:" / "RM:" / "Relationship Manager:".
+_SPEAKER_RE = re.compile(r"^\s*(client|customer|rm|relationship manager|advisor)\s*:\s*", re.IGNORECASE)
 
 
-def split_utterances(text: str) -> List[str]:
-    """Turn a scripted call into utterance-sized chunks, mimicking STT finals.
+def _normalize_speaker(label: str) -> str:
+    """Map a spoken label to a canonical speaker id ('client' or 'rm')."""
+    l = label.strip().lower()
+    if l in {"client", "customer"}:
+        return "client"
+    return "rm"
+
+
+def split_utterances(text: str) -> List[Tuple[str, str]]:
+    """Turn a scripted call into (speaker, utterance) chunks, mimicking STT finals.
 
     - keeps only the spoken body (drops a metadata header before the first '---')
+    - reads per-line speaker markers like 'Client:' / 'RM:'; lines without a
+      marker inherit the previous speaker (continuation)
     - strips bracket cue markers like '[TOPIC SHIFT]' so the agent segments blind
-    - splits on sentence boundaries
+    - splits on sentence boundaries, tagging every sentence with its speaker
+
+    Scripts with no speaker markers fall back to all-client (legacy behaviour).
     """
     # drop metadata header: take everything after the first '---' divider, if any
     if "---" in text:
         text = text.split("---", 1)[1]
-    text = _MARKER_RE.sub(" ", text)               # remove cue markers
-    text = re.sub(r"=+", " ", text)                 # drop '====' rules
-    # collapse paragraph breaks into spaces, then sentence-split
-    flat = re.sub(r"\s+", " ", text).strip()
-    return [s.strip() for s in _SENTENCE_RE.split(flat) if s.strip()]
+
+    out: List[Tuple[str, str]] = []
+    speaker = "client"  # default until a marker says otherwise
+    for line in text.splitlines():
+        m = _SPEAKER_RE.match(line)
+        if m:
+            speaker = _normalize_speaker(m.group(1))
+            line = line[m.end():]
+        line = _MARKER_RE.sub(" ", line)            # remove cue markers
+        line = re.sub(r"=+", " ", line)             # drop '====' rules
+        flat = re.sub(r"\s+", " ", line).strip()
+        if not flat:
+            continue
+        # protect titles so "Dr. Keller" isn't split into two utterances
+        flat = re.sub(r"\b(Dr|Mr|Mrs|Ms|St|Prof)\.", r"\1∯", flat)
+        for s in _SENTENCE_RE.split(flat):
+            s = s.replace("∯", ".").strip()
+            if s:
+                out.append((speaker, s))
+    return out
 
 
 async def _maybe_await(value) -> None:

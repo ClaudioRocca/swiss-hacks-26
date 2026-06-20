@@ -144,7 +144,13 @@ def _execute_query(source: str, planned_filters: dict) -> dict:
 # WebSocket pipeline
 # ---------------------------------------------------------------------------
 
-DEFAULT_TEXT_FILE = "client_calls/call_4_wealth_management.txt"
+DEFAULT_TEXT_FILE = "client_calls/call_7_two_way.txt"
+
+# The mock data layer is anchored to late May 2025 (latest trade 2025-05-20,
+# market movements 2025-05-26, news up to 2025-05-23). Pin the agent's "today"
+# there so spoken relative dates ("today", "last couple of weeks") resolve INTO
+# the data window instead of the real wall-clock date (which would return empty).
+DEMO_NOW = date(2025, 5, 26)
 UPLOADS_DIR = Path(__file__).parent / "uploads"
 UPLOADS_DIR.mkdir(exist_ok=True)
 
@@ -191,9 +197,9 @@ async def websocket_pipeline(ws: WebSocket):
             except Exception:
                 pass
 
-        async def on_final(text: str) -> None:
+        async def on_final(text: str, speaker: str = "client") -> None:
             try:
-                await ws.send_json({"type": "final", "text": text})
+                await ws.send_json({"type": "final", "text": text, "speaker": speaker})
             except Exception:
                 pass
 
@@ -230,11 +236,12 @@ async def websocket_pipeline(ws: WebSocket):
                 on_partial=on_partial,
                 on_final=on_final,
                 realtime=True,
+                now=DEMO_NOW,
             )
         else:
             # Text mode: read the script, stream utterances through segmenter
             text = resolved.read_text()
-            await run_text(text, on_trigger=on_trigger, on_final=on_final)
+            await run_text(text, on_trigger=on_trigger, on_final=on_final, now=DEMO_NOW)
 
         await ws.send_json({"type": "done"})
 

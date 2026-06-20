@@ -43,10 +43,10 @@ def make_handlers(show_partials: bool):
         sys.stdout.write(f"\r{DIM}… {state['line']}{RESET}")
         sys.stdout.flush()
 
-    def on_final(text: str) -> None:
+    def on_final(text: str, speaker: str = "client") -> None:
         state["line"] = ""
         sys.stdout.write("\r\033[K")  # clear partial line
-        print(f"{DIM}final ▸ {text}{RESET}")
+        print(f"{DIM}final ▸ [{speaker}] {text}{RESET}")
 
     def on_trigger(chunk: ConceptChunk) -> None:
         print()

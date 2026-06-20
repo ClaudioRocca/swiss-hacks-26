@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   PhoneOff, Play, X, TrendingUp, Building2, ShieldCheck, Sparkles,
-  CheckCircle2, Briefcase, Newspaper, BarChart3, Home,
+  CheckCircle2, Briefcase, Newspaper, BarChart3, Home, ChevronDown, ChevronUp,
 } from "lucide-react";
-import { useCallState, formatDuration } from "../lib/call-state";
+import { useCallState } from "../lib/call-state";
 import { usePipeline, type Concept, type ExecutedQuery } from "../lib/use-pipeline";
 
 export const Route = createFileRoute("/")({
@@ -163,19 +163,35 @@ function NewsResults({ results }: { results: unknown }) {
   if (!rows?.length) return <EmptyResults label="No relevant news" />;
   return (
     <div className="space-y-2">
-      {rows.slice(0, 3).map((r, i) => {
-        const meta = r.metadata as Record<string, string> | undefined;
-        return (
-          <div key={i} className="rounded-xl px-3 py-2 text-xs" style={{ background: "#FAFAF7", border: "1px solid #F1ECE0" }}>
-            <div className="font-medium leading-snug" style={{ color: TEXT }}>
-              {String(r.document).slice(0, 120)}…
-            </div>
-            <div className="mt-1" style={{ color: "#6B7280" }}>
-              {meta?.source} · {meta?.category} · score {Number(r.similarity_score).toFixed(2)}
-            </div>
-          </div>
-        );
-      })}
+      {rows.slice(0, 3).map((r, i) => (
+        <NewsItem key={i} row={r} />
+      ))}
+    </div>
+  );
+}
+
+function NewsItem({ row }: { row: Record<string, unknown> }) {
+  const [expanded, setExpanded] = useState(false);
+  const meta = row.metadata as Record<string, string> | undefined;
+  const doc = String(row.document);
+  const isLong = doc.length > 120;
+  return (
+    <div className="rounded-xl px-3 py-2 text-xs" style={{ background: "#FAFAF7", border: "1px solid #F1ECE0" }}>
+      <div className="font-medium leading-snug" style={{ color: TEXT }}>
+        {expanded || !isLong ? doc : `${doc.slice(0, 120)}…`}
+      </div>
+      <div className="mt-1 flex items-center justify-between gap-2" style={{ color: "#6B7280" }}>
+        <span>{meta?.source} · {meta?.category}</span>
+        {isLong && (
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className="press inline-flex items-center gap-1 font-semibold uppercase tracking-wider"
+            style={{ color: NAVY, fontSize: 10 }}
+          >
+            {expanded ? <>Collapse <ChevronUp className="h-3 w-3" /></> : <>Read full <ChevronDown className="h-3 w-3" /></>}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -241,7 +257,7 @@ function QueryResultBody({ query }: { query: ExecutedQuery }) {
 
 function LiveCallPage() {
   const navigate = useNavigate();
-  const { elapsed, callEnded, endCall } = useCallState();
+  const { callEnded, endCall } = useCallState();
   const { start, stop, status, transcriptLines, partial, concepts } = usePipeline();
   const transcriptEndRef = useRef<HTMLDivElement>(null);
 
@@ -287,13 +303,6 @@ function LiveCallPage() {
               {isIdle ? "Ready" : "Active Call"}
             </div>
             <div className="font-serif text-white" style={{ fontSize: 22 }}>Mr. Alessandro Ferretti</div>
-          </div>
-          <div className="h-10 w-px bg-white/10" />
-          <div>
-            <div style={{ color: "rgba(184,149,90,0.8)", letterSpacing: "0.2em", fontSize: 10, textTransform: "uppercase", fontWeight: 600 }}>
-              Duration
-            </div>
-            <div className="font-mono tabular text-white" style={{ fontSize: 20, fontWeight: 300 }}>{formatDuration(elapsed)}</div>
           </div>
           {isDone || callEnded ? (
             <div
@@ -383,32 +392,67 @@ function LiveCallPage() {
               </div>
             )}
 
-            {transcriptLines.map((line, i) => (
-              <div
-                key={i}
-                className="flex gap-4 animate-fade-up py-4"
-                style={{
-                  animationDelay: `${Math.min(i, 5) * 30}ms`,
-                  borderBottom: "1px solid rgba(20,30,85,0.06)",
-                }}
-              >
-                <div className="w-16 shrink-0 pt-0.5 font-mono tabular" style={{ color: NAVY, fontSize: 11, opacity: 0.45 }}>
-                  {line.timestamp}
+            {transcriptLines.map((line, i) => {
+              const isRM = line.speaker === "rm";
+              return (
+                <div
+                  key={i}
+                  className="flex animate-fade-up py-1.5"
+                  style={{
+                    animationDelay: `${Math.min(i, 5) * 30}ms`,
+                    justifyContent: isRM ? "flex-end" : "flex-start",
+                  }}
+                >
+                  <div className="max-w-[78%]">
+                    <div
+                      className="text-[10px] font-semibold uppercase tracking-wider mb-0.5"
+                      style={{ color: isRM ? GOLD : "#6B7280", textAlign: isRM ? "right" : "left" }}
+                    >
+                      {isRM ? "Relationship Manager" : "Client"}
+                    </div>
+                    <div
+                      style={{
+                        background: isRM ? NAVY : "#FFFFFF",
+                        color: isRM ? "#FFFFFF" : "#1C1C2E",
+                        border: isRM ? "none" : "1px solid #E5E7EB",
+                        borderRadius: 16,
+                        borderTopRightRadius: isRM ? 4 : 16,
+                        borderTopLeftRadius: isRM ? 16 : 4,
+                        padding: "8px 12px",
+                        fontSize: 14,
+                        lineHeight: 1.6,
+                        boxShadow: "0 1px 2px rgba(10,18,64,0.06)",
+                      }}
+                    >
+                      {highlight(line.text)}
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div style={{ color: "#1C1C2E", fontSize: 14, lineHeight: 1.7 }}>{highlight(line.text)}</div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
 
-            {/* Partial (in-progress) line */}
+            {/* Partial (in-progress) line — client side */}
             {partial && (
-              <div className="flex gap-4 py-4 opacity-60">
-                <div className="w-16 shrink-0 pt-0.5 font-mono tabular" style={{ color: NAVY, fontSize: 11, opacity: 0.45 }}>
-                  …
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div style={{ color: "#1C1C2E", fontSize: 14, lineHeight: 1.7, fontStyle: "italic" }}>{partial}</div>
+              <div className="flex justify-start py-1.5 opacity-60">
+                <div className="max-w-[78%]">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: "#6B7280" }}>
+                    Client
+                  </div>
+                  <div
+                    style={{
+                      background: "#FFFFFF",
+                      color: "#1C1C2E",
+                      border: "1px solid #E5E7EB",
+                      borderRadius: 16,
+                      borderTopLeftRadius: 4,
+                      padding: "8px 12px",
+                      fontSize: 14,
+                      lineHeight: 1.6,
+                      fontStyle: "italic",
+                    }}
+                  >
+                    {partial}
+                  </div>
                 </div>
               </div>
             )}
