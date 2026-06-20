@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS calls (
     sentiment_label TEXT CHECK(sentiment_label IS NULL OR sentiment_label IN ('negative', 'neutral', 'positive')),
     risk_signal TEXT CHECK(risk_signal IS NULL OR risk_signal IN ('conservative', 'moderate', 'aggressive')),
     topics TEXT,
+    facts_json TEXT,
     insights_json TEXT
 );
 

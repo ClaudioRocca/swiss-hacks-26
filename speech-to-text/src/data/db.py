@@ -502,6 +502,7 @@ def get_call(call_id: int) -> dict:
             return {}
         result = dict(row)
         result["topics"] = _loads(result.get("topics")) or []
+        result["facts"] = _loads(result.get("facts_json"))
         result["insights"] = _loads(result.get("insights_json"))
         return result
     except sqlite3.OperationalError as e:
@@ -539,6 +540,50 @@ def get_risk_history(customer_id: int | None = None) -> list[dict]:
         conn.close()
 
 
+def save_call_facts(
+    call_id: int,
+    facts: dict | None = None,
+    *,
+    summary: str | None = None,
+    sentiment_score: float | None = None,
+    sentiment_label: str | None = None,
+    risk_signal: str | None = None,
+    topics: list | None = None,
+) -> None:
+    """Persist the extraction layer's structured facts onto a call row.
+
+    Writes the full `facts` object to facts_json plus the derived trend columns
+    (summary/sentiment/risk_signal/topics). Only provided fields are written;
+    existing values are kept otherwise (COALESCE). `facts` and `topics` are
+    JSON-serialized. Raises DataLayerError if the call row does not exist.
+    """
+    conn = _get_sqlite_connection()
+    try:
+        facts_json = json.dumps(facts) if facts is not None else None
+        topics_json = json.dumps(topics) if topics is not None else None
+        cursor = conn.execute(
+            """
+            UPDATE calls SET
+                facts_json      = COALESCE(?, facts_json),
+                summary         = COALESCE(?, summary),
+                sentiment_score = COALESCE(?, sentiment_score),
+                sentiment_label = COALESCE(?, sentiment_label),
+                risk_signal     = COALESCE(?, risk_signal),
+                topics          = COALESCE(?, topics)
+            WHERE id = ?
+            """,
+            [facts_json, summary, sentiment_score, sentiment_label,
+             risk_signal, topics_json, int(call_id)],
+        )
+        if cursor.rowcount == 0:
+            raise DataLayerError(f"No call with id {call_id} to update")
+        conn.commit()
+    except sqlite3.OperationalError as e:
+        raise DataLayerError(f"SQLite database unavailable: {e}")
+    finally:
+        conn.close()
+
+
 def save_call_insights(
     call_id: int,
     insights: dict | None = None,
@@ -549,11 +594,11 @@ def save_call_insights(
     risk_signal: str | None = None,
     topics: list | None = None,
 ) -> None:
-    """Persist a computed insights bundle (and trend columns) onto a call row.
+    """Persist the synthesis layer's computed brief onto a call row.
 
+    Writes the brief/bundle to insights_json (and optionally the trend columns).
     Only provided fields are written; existing values are kept otherwise
-    (COALESCE). `insights` and `topics` are JSON-serialized. Raises
-    DataLayerError if the call row does not exist or the DB is unavailable.
+    (COALESCE). Raises DataLayerError if the call row does not exist.
     """
     conn = _get_sqlite_connection()
     try:
