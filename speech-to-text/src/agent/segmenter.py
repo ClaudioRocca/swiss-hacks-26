@@ -75,6 +75,8 @@ class ConceptChunk:
     entities: List[str] = field(default_factory=list)
     data_requests: List[DataRequest] = field(default_factory=list)
     index: int = 0
+    # transcript utterance indices (in arrival order) that make up this concept
+    line_indices: List[int] = field(default_factory=list)
 
 
 TriggerCb = Callable[[ConceptChunk], Optional[Awaitable[None]]]
@@ -252,16 +254,18 @@ class ConceptSegmenter:
         self.client = AsyncOpenAI(
             http_client=httpx.AsyncClient(verify=False),
         )
-        # buffer holds (speaker, text) so the agent reads the labeled exchange
-        self._buffer: List[tuple[str, str]] = []
+        # buffer holds (speaker, text, line_index) so the agent reads the labeled
+        # exchange and each concept can point back to its transcript lines
+        self._buffer: List[tuple[str, str, int]] = []
         self._emitted = 0
+        self._line_counter = 0  # global utterance index, matches the transcript
 
     @staticmethod
     def _label(speaker: str) -> str:
         return "RM" if speaker == "rm" else "Client"
 
-    def _format(self, turns: List[tuple[str, str]]) -> str:
-        return "\n".join(f"{self._label(s)}: {t}" for s, t in turns).strip()
+    def _format(self, turns: List[tuple[str, str, int]]) -> str:
+        return "\n".join(f"{self._label(s)}: {t}" for s, t, _ in turns).strip()
 
     @property
     def current_text(self) -> str:
@@ -282,15 +286,18 @@ class ConceptSegmenter:
         if not utterance:
             return
 
+        idx = self._line_counter
+        self._line_counter += 1
+
         if not self._buffer:
-            self._buffer.append((speaker, utterance))
+            self._buffer.append((speaker, utterance, idx))
             return
 
         candidate = f"{self._label(speaker)}: {utterance}"
         if await self._is_new_topic(self.current_text, self.recent_text, candidate):
             await self._flush()
 
-        self._buffer.append((speaker, utterance))
+        self._buffer.append((speaker, utterance, idx))
 
     async def close(self) -> None:
         """Flush whatever concept is still buffered at end of stream."""
@@ -298,6 +305,7 @@ class ConceptSegmenter:
 
     async def _flush(self) -> None:
         text = self.current_text
+        line_indices = [i for _, _, i in self._buffer]
         self._buffer = []
         if not text:
             return
@@ -313,6 +321,7 @@ class ConceptSegmenter:
         if not is_relevant:
             return  # greeting/pleasantry or off-topic — no trigger
         chunk.index = self._emitted
+        chunk.line_indices = line_indices
         self._emitted += 1
         await _maybe_await(self.on_trigger(chunk))
 

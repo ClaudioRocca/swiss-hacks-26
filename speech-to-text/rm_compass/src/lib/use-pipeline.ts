@@ -42,6 +42,7 @@ export type Concept = {
   text: string;
   data_requests: { source: string; rationale: string }[];
   executed_queries: ExecutedQuery[];
+  line_indices?: number[]; // transcript line indices this concept was built from
 };
 
 export type PipelineStatus = "idle" | "connecting" | "running" | "done" | "error";
@@ -55,12 +56,9 @@ export function usePipeline() {
   const wsRef = useRef<WebSocket | null>(null);
   const lineCountRef = useRef(0);
 
-  const formatTime = (index: number): string => {
-    const totalSeconds = index * 8; // rough ~8s per utterance for display
-    const mm = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
-    const ss = String(totalSeconds % 60).padStart(2, "0");
-    return `00:${mm}:${ss}`;
-  };
+  // Wall-clock time the utterance was finalized — shown next to each message.
+  const formatTime = (): string =>
+    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   const start = useCallback(
     (opts?: { file?: string; mode?: "text" | "audio" }) => {
@@ -97,7 +95,7 @@ export function usePipeline() {
               ...prev,
               {
                 text: data.text,
-                timestamp: formatTime(lineCountRef.current),
+                timestamp: formatTime(),
                 speaker: data.speaker === "rm" ? "rm" : "client",
               },
             ]);

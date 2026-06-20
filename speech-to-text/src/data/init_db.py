@@ -128,7 +128,7 @@ TRADE_OPERATIONS = [
 MARKET_MOVEMENTS = [
     {"ticker": "NESN", "company_name": "Nestle SA", "sector": "consumer staples", "price_change": 2.30, "percentage_change": 2.18, "current_price": 107.80, "volume": 4520000, "timestamp": "2025-05-26T16:30:00Z"},
     {"ticker": "NOVN", "company_name": "Novartis AG", "sector": "healthcare", "price_change": -1.55, "percentage_change": -1.67, "current_price": 91.45, "volume": 3870000, "timestamp": "2025-05-26T16:30:00Z"},
-    {"ticker": "ROG", "company_name": "Roche Holding AG", "sector": "healthcare", "price_change": 3.80, "percentage_change": 1.49, "current_price": 258.90, "volume": 1950000, "timestamp": "2025-05-26T16:30:00Z"},
+    {"ticker": "RO", "company_name": "Roche Holding AG", "sector": "healthcare", "price_change": 3.80, "percentage_change": 1.49, "current_price": 258.90, "volume": 1950000, "timestamp": "2025-05-26T16:30:00Z"},
     {"ticker": "UBSG", "company_name": "UBS Group AG", "sector": "financials", "price_change": 0.45, "percentage_change": 1.61, "current_price": 28.35, "volume": 8200000, "timestamp": "2025-05-26T16:30:00Z"},
     {"ticker": "ZURN", "company_name": "Zurich Insurance Group", "sector": "insurance", "price_change": -5.40, "percentage_change": -1.12, "current_price": 478.60, "volume": 980000, "timestamp": "2025-05-26T16:30:00Z"},
     {"ticker": "AAPL", "company_name": "Apple Inc.", "sector": "technology", "price_change": 4.20, "percentage_change": 2.16, "current_price": 198.30, "volume": 52000000, "timestamp": "2025-05-26T20:00:00Z"},
