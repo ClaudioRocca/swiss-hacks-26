@@ -1,0 +1,58 @@
+Client: Dr. Maximilian Keller
+Relationship Manager: Sofia Lambro
+Call type: portfolio review — RM reads the surfaced data back to the client (demo)
+---
+
+RM: Good morning, Dr. Keller. Always a pleasure.
+
+Client: Morning, Sofia! Forgive the slightly croaky voice — Ingrid and I have just got back from a few days walking in the Engadin, marvellous air up there. Right, down to business: let's begin with my technology holdings. Show me where my technology positions stand.
+
+RM: Of course, pulling up your technology book now.
+
+RM: You hold three technology names: 500 Apple at USD 198.30, up USD 27,900; 300 Microsoft at USD 430.50, up USD 45,150; and 400 NVIDIA at USD 145, up USD 20,000.
+
+Client: Microsoft has been awfully good to me. Is there any fresh news on Microsoft, especially the cloud side of things?
+
+RM: Let me pull the latest coverage.
+
+RM: Bloomberg reports Microsoft Azure posted 45 percent revenue growth driven by enterprise AI adoption, and notes Swiss corporate clients are among the fastest adopters in Europe.
+
+Client: Splendid. And how did Apple and Microsoft move on the market today?
+
+RM: One moment, checking today's movements.
+
+RM: Apple is up 2.16 percent today, while Microsoft is down 0.81 percent.
+
+Client: Now, let's talk Nestlé. Remind me of the Nestlé trades we made over the past couple of weeks — I recall we did something rather clever with a short.
+
+RM: Pulling your recent Nestlé activity.
+
+RM: Three operations on Nestlé: a short-sell of 300 shares for CHF 29,550 on the 12th of May, a short-cover of 300 for CHF 32,340 on the 20th, and a buy of 200 for CHF 21,560 the same day.
+
+Client: Good memory, you. Is there any news on Nestlé driving things at the moment?
+
+RM: Searching now.
+
+RM: The Financial Times reports Nestlé announced a CHF 3 billion share buyback amid activist investor pressure, divesting underperforming water brands while doubling down on health science and premium coffee.
+
+Client: Fascinating. Let's turn to Zurich Insurance — what's my position there, and how did it move today?
+
+RM: Certainly, bringing up your Zurich Insurance position and today's move.
+
+RM: You hold 600 shares of Zurich Insurance at CHF 478.60, an unrealized gain of CHF 17,040. Today it is down 1.12 percent.
+
+Client: And is there anything in the news on Zurich Insurance?
+
+RM: Let me have a look.
+
+RM: Bloomberg reports Zurich Insurance posted a record first-half operating profit of USD 4.2 billion and raised its dividend outlook for 2025.
+
+Client: Very reassuring. One last thing before I let you go, Sofia — the homes. Pull up my active residential properties for me.
+
+RM: Filtering your active residential holdings now.
+
+RM: You hold two active residential properties: the apartment in Zurich Seefeld, valued at CHF 4.8 million, and the place in Lugano Paradiso, at CHF 2.2 million.
+
+Client: Wonderful — thank you so much, Sofia, that's everything for today. Do give my best to the team.
+
+RM: Always a pleasure, Dr. Keller. I'll send the written summary across shortly.

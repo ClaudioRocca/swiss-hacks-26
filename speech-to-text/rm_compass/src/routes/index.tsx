@@ -25,6 +25,13 @@ export const Route = createFileRoute("/")({
 
 const NAVY = "#141E55";
 const TEXT = "#1A1A2E";
+
+// Selectable demo scripts (resolved server-side against the speech-to-text dir).
+const DEMO_FILES: Record<1 | 2, string> = {
+  1: "client_calls/call_8_demo_readback.txt",
+  2: "client_calls/call_9_demo_readback.txt",
+};
+
 // Julius Bär neutrals
 const LINE = "#E7E4DB";   // hairline border
 const STONE = "#F4F3EE";  // warm light-gray panel/card
@@ -248,6 +255,8 @@ function LiveCallPage() {
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
   const [customerProfile, setCustomerProfile] = useState<CustomerProfile | null>(null);
 
+  const [demo, setDemo] = useState<1 | 2>(1);
+
   const isLive = status === "running";
   const isDone = status === "done";
   const isIdle = status === "idle";
@@ -341,7 +350,7 @@ function LiveCallPage() {
 
   const handleStart = () => {
     clearSession(); // clear any previous session
-    start(); // uses default text file
+    start({ file: DEMO_FILES[demo] });
   };
 
   const handleEndCall = () => {
@@ -389,6 +398,24 @@ function LiveCallPage() {
           ) : null}
         </div>
         <div className="flex items-center gap-3">
+          {isIdle && (
+            <div className="inline-flex items-center overflow-hidden" style={{ border: `1px solid ${LINE}`, borderRadius: 8 }}>
+              {([1, 2] as const).map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDemo(d)}
+                  className="press px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors"
+                  style={{
+                    background: demo === d ? NAVY : "transparent",
+                    color: demo === d ? "#FFFFFF" : MUTE,
+                    borderLeft: d === 2 ? `1px solid ${LINE}` : "none",
+                  }}
+                >
+                  Demo {d}
+                </button>
+              ))}
+            </div>
+          )}
           {isIdle && (
             <button
               onClick={handleStart}
