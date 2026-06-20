@@ -52,9 +52,11 @@ _EXTRACT_SCHEMA = {
         "is_filler": {
             "type": "boolean",
             "description": (
-                "true if this slice is ONLY a greeting/pleasantry/acknowledgement "
-                "with no substantive concept (e.g. 'hello, how are you', 'thanks, "
-                "bye'). false if it carries any real topic/request/information."
+                "true if this slice should be DISCARDED: either a pure "
+                "greeting/pleasantry/acknowledgement (e.g. 'hello, how are you', "
+                "'thanks, bye'), OR off-topic small talk unrelated to financial/"
+                "banking/investment work (e.g. weather, sports, personal chit-chat). "
+                "false ONLY if it carries a substantive work/financial concept."
             ),
         },
         "topic": {"type": "string", "description": "2-5 word concept label"},
@@ -136,14 +138,22 @@ class ConceptSegmenter:
                 {
                     "role": "system",
                     "content": (
-                        "You segment a live transcript by concept. Given the CURRENT "
-                        "concept so far and the NEXT utterance, decide if the next "
-                        "utterance starts a clearly different topic/concept. Minor "
-                        "elaboration or follow-up is NOT a new topic.\n"
+                        "You are the assistant of a relationship manager in a private "
+                        "bank. You segment a live transcript of a conversation between a "
+                        "wealthy client and their relationship manager into distinct "
+                        "concepts. The concepts that matter are financial, investment, "
+                        "and banking-related work topics (e.g. transactions, fraud, "
+                        "mortgages, payments, portfolio, accounts).\n"
+                        "Given the CURRENT concept so far and the NEXT utterance, decide "
+                        "if the next utterance starts a clearly different topic/concept. "
+                        "Minor elaboration or follow-up is NOT a new topic.\n"
                         "RULE: a greeting/pleasantry (e.g. 'hello, how are you', "
                         "'thanks, bye') is ALWAYS its own segment — if CURRENT is only "
                         "a greeting/pleasantry and NEXT carries any real content, that "
-                        "IS a new topic. Likewise NEXT being a greeting is a boundary."
+                        "IS a new topic. Likewise NEXT being a greeting is a boundary.\n"
+                        "RULE: a shift from a work/financial topic to off-topic small "
+                        "talk (or vice versa) is also a boundary — segment them apart so "
+                        "the off-topic part can be discarded downstream."
                     ),
                 },
                 {
@@ -172,9 +182,12 @@ class ConceptSegmenter:
                 {
                     "role": "system",
                     "content": (
-                        "Extract the core concept from this transcript slice. Set "
-                        "is_filler=true only if the slice is purely a greeting or "
-                        "pleasantry with no substantive content."
+                        "You support a private-bank relationship manager. Extract the "
+                        "core concept from this transcript slice of a client conversation. "
+                        "Set is_filler=true if the slice is a greeting/pleasantry OR "
+                        "off-topic small talk unrelated to financial/banking/investment "
+                        "work; such slices are discarded. Otherwise capture the "
+                        "work/financial concept."
                     ),
                 },
                 {"role": "user", "content": text},
