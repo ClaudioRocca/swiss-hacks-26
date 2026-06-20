@@ -10,6 +10,7 @@ import sqlite3
 from pathlib import Path
 
 import chromadb
+import httpx
 from openai import OpenAI
 
 from src.data import DataLayerError
@@ -358,7 +359,10 @@ def search_news(
         if not api_key:
             raise DataLayerError("OpenAI API key not configured (OPENAI_API_KEY)")
 
-        client = OpenAI(api_key=api_key)
+        client = OpenAI(
+            api_key=api_key,
+            http_client=httpx.Client(verify=False),
+        )
         response = client.embeddings.create(
             input=query,
             model="text-embedding-3-small",

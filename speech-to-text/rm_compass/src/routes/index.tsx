@@ -1,11 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   PhoneOff, Play, X, TrendingUp, Building2, ShieldCheck, Sparkles,
   CheckCircle2, Briefcase, Newspaper, BarChart3, Home, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { useCallState } from "../lib/call-state";
 import { usePipeline, type Concept, type ExecutedQuery } from "../lib/use-pipeline";
+import { TradingViewChart } from "../components/trading-view-chart";
+import { extractTickersFromConcepts } from "../lib/ticker-utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [{ title: "Live Call — RM Intelligence" }] }),
@@ -260,10 +262,22 @@ function LiveCallPage() {
   const { callEnded, endCall } = useCallState();
   const { start, stop, status, transcriptLines, partial, concepts } = usePipeline();
   const transcriptEndRef = useRef<HTMLDivElement>(null);
+  const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
 
   const isLive = status === "running";
   const isDone = status === "done";
   const isIdle = status === "idle";
+
+  // Extract tickers from concepts and auto-select the latest one
+  const detectedTickers = useMemo(() => extractTickersFromConcepts(concepts), [concepts]);
+  const hasCharts = detectedTickers.length > 0;
+
+  // Auto-select latest ticker when new ones appear
+  useEffect(() => {
+    if (detectedTickers.length > 0) {
+      setSelectedTicker(detectedTickers[detectedTickers.length - 1]);
+    }
+  }, [detectedTickers.length]);
 
   // Auto-scroll transcript to bottom
   useEffect(() => {
@@ -299,9 +313,6 @@ function LiveCallPage() {
       >
         <div className="flex items-center gap-6">
           <div>
-            <div style={{ color: "rgba(184,149,90,0.8)", letterSpacing: "0.2em", fontSize: 10, textTransform: "uppercase", fontWeight: 600 }}>
-              {isIdle ? "Ready" : "Active Call"}
-            </div>
             <div className="font-serif text-white" style={{ fontSize: 22 }}>Mr. Alessandro Ferretti</div>
           </div>
           {isDone || callEnded ? (
@@ -311,23 +322,6 @@ function LiveCallPage() {
             >
               <CheckCircle2 className="h-3 w-3 text-white/70" />
               <span className="text-[11px] font-semibold uppercase tracking-wider text-white/70">Call Ended</span>
-            </div>
-          ) : isLive ? (
-            <div
-              className="inline-flex items-center gap-2"
-              style={{
-                background: "transparent",
-                border: "1px solid #ef4444",
-                color: "#ef4444",
-                borderRadius: 20,
-                padding: "4px 12px",
-                fontSize: 11,
-                letterSpacing: "0.1em",
-                fontWeight: 600,
-              }}
-            >
-              <span className="h-1.5 w-1.5 animate-blink rounded-full" style={{ background: "#ef4444" }} />
-              LIVE
             </div>
           ) : null}
         </div>
@@ -366,15 +360,12 @@ function LiveCallPage() {
         </div>
       </header>
 
-      {/* Main content: transcript left, widgets right */}
-      <div className="grid flex-1 min-h-0 grid-cols-[60%_40%]">
+      {/* Main content: transcript left, widgets center, chart right */}
+      <div className={`grid flex-1 min-h-0 ${hasCharts ? "grid-cols-[45%_25%_30%]" : "grid-cols-[60%_40%]"}`} style={{ transition: "grid-template-columns 0.3s ease" }}>
         {/* Transcript panel */}
         <section className="flex min-h-0 flex-col" style={{ background: "#FAFAF9", borderRight: "1px solid #E5E7EB" }}>
           <div className="flex items-center justify-between border-b px-8 py-3" style={{ borderColor: "rgba(20,30,85,0.08)", background: "#FAFAF9" }}>
             <div className="text-[11px] font-medium uppercase tracking-[0.18em]" style={{ color: "#6B7280" }}>Live Transcript</div>
-            <div className="text-[11px]" style={{ color: "#6B7280" }}>
-              {transcriptLines.length} utterance{transcriptLines.length !== 1 ? "s" : ""}
-            </div>
           </div>
           <div
             className="relative flex-1 overflow-y-auto px-8 py-6"
@@ -472,7 +463,7 @@ function LiveCallPage() {
             {isDone && transcriptLines.length > 0 && (
               <div className="flex items-center gap-2 pt-6 text-xs" style={{ color: "#6B7280" }}>
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                Pipeline complete — {transcriptLines.length} utterances, {concepts.length} concepts detected
+                Pipeline complete — {concepts.length} concepts detected
               </div>
             )}
 
@@ -512,6 +503,39 @@ function LiveCallPage() {
             )}
           </div>
         </aside>
+
+        {/* TradingView Chart Panel — appears when tickers are detected */}
+        {hasCharts && (
+          <section className="flex min-h-0 flex-col" style={{ background: "#0F1629", borderLeft: "1px solid rgba(184,149,90,0.15)" }}>
+            {/* Ticker tabs */}
+            <div className="flex items-center gap-1 overflow-x-auto border-b border-white/10 px-4 py-2">
+              <TrendingUp className="h-3.5 w-3.5 shrink-0" style={{ color: GOLD }} />
+              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider mr-2" style={{ color: GOLD }}>
+                Charts
+              </span>
+              {detectedTickers.map((ticker) => (
+                <button
+                  key={ticker}
+                  onClick={() => setSelectedTicker(ticker)}
+                  className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors"
+                  style={{
+                    background: selectedTicker === ticker ? "rgba(184,149,90,0.15)" : "transparent",
+                    color: selectedTicker === ticker ? GOLD : "rgba(255,255,255,0.6)",
+                    border: selectedTicker === ticker ? `1px solid ${GOLD}` : "1px solid transparent",
+                  }}
+                >
+                  {ticker.includes(":") ? ticker.split(":")[1] : ticker}
+                </button>
+              ))}
+            </div>
+            {/* Chart */}
+            <div className="flex-1 min-h-0">
+              {selectedTicker && (
+                <TradingViewChart symbol={selectedTicker} theme="dark" />
+              )}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
