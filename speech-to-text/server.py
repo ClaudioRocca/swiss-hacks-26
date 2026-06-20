@@ -37,6 +37,7 @@ load_dotenv(_here.parent / ".env")
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 # Ensure src is importable
 sys.path.insert(0, str(Path(__file__).parent))
@@ -44,6 +45,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.agent.segmenter import ConceptChunk, DataRequest
 from src.data import DataLayerError, db
 from src.orchestrator import run_file, run_text
+from src.post_call_analysis import generate_post_call_analysis
 
 # ---------------------------------------------------------------------------
 # App setup
@@ -256,6 +258,55 @@ async def websocket_pipeline(ws: WebSocket):
             await ws.send_json({"type": "error", "message": f"{type(e).__name__}: {e}"})
         except Exception:
             pass
+
+
+# ---------------------------------------------------------------------------
+# REST API — Post-call analysis & data endpoints
+# ---------------------------------------------------------------------------
+
+
+class PostCallRequest(BaseModel):
+    transcript_lines: list[dict]
+    concepts: list[dict]
+    customer_profile: dict | None = None
+
+
+@app.post("/api/post-call-analysis")
+async def post_call_analysis(req: PostCallRequest):
+    """Generate AI post-call analysis from call data.
+
+    Accepts transcript, concepts (with executed queries), and optionally
+    the customer profile. If profile not provided, fetches from DB.
+    """
+    # Use provided profile or fetch from DB
+    profile = req.customer_profile
+    if not profile:
+        try:
+            profile = db.get_customer_profile()
+        except DataLayerError:
+            profile = {"name": "Unknown", "risk_appetite": "moderate"}
+
+    try:
+        result = await generate_post_call_analysis(
+            transcript_lines=req.transcript_lines,
+            concepts=req.concepts,
+            customer_profile=profile,
+        )
+        return {"status": "ok", "analysis": result}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "message": f"{type(e).__name__}: {e}"}
+
+
+@app.get("/api/customer-profile")
+def get_customer_profile():
+    """Return the customer profile from the data layer."""
+    try:
+        profile = db.get_customer_profile()
+        return {"status": "ok", "profile": profile}
+    except DataLayerError as e:
+        return {"status": "error", "message": str(e)}
 
 
 # ---------------------------------------------------------------------------

@@ -5,6 +5,7 @@ import {
   CheckCircle2, Briefcase, Newspaper, BarChart3, Home, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { useCallState } from "../lib/call-state";
+import { useCallSession, fetchCustomerProfile, type CustomerProfile } from "../lib/call-session";
 import { usePipeline, type Concept, type ExecutedQuery } from "../lib/use-pipeline";
 import { TradingViewChart } from "../components/trading-view-chart";
 import { extractTickersFromConcepts } from "../lib/ticker-utils";
@@ -267,14 +268,41 @@ function QueryResultBody({ query }: { query: ExecutedQuery }) {
 
 function LiveCallPage() {
   const navigate = useNavigate();
-  const { callEnded, endCall } = useCallState();
+  const { callEnded, endCall, elapsed } = useCallState();
+  const { saveSession, clearSession } = useCallSession();
   const { start, stop, status, transcriptLines, partial, concepts } = usePipeline();
   const transcriptEndRef = useRef<HTMLDivElement>(null);
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
+  const [customerProfile, setCustomerProfile] = useState<CustomerProfile | null>(null);
 
   const isLive = status === "running";
   const isDone = status === "done";
   const isIdle = status === "idle";
+
+  // Fetch customer profile once on mount (needed for post-call analysis)
+  useEffect(() => {
+    fetchCustomerProfile()
+      .then(setCustomerProfile)
+      .catch((err) => console.warn("Could not fetch customer profile:", err));
+  }, []);
+
+  // Auto-save session when pipeline finishes (handles both manual end and natural completion)
+  const sessionSavedRef = useRef(false);
+  useEffect(() => {
+    if (isDone && transcriptLines.length > 0 && !sessionSavedRef.current) {
+      sessionSavedRef.current = true;
+      saveSession({
+        transcriptLines,
+        concepts,
+        customerProfile,
+        callDurationSeconds: elapsed,
+        clientName: "Mr. Alessandro Ferretti",
+      });
+    }
+    if (isIdle) {
+      sessionSavedRef.current = false;
+    }
+  }, [isDone, isIdle, transcriptLines, concepts, customerProfile, elapsed, saveSession]);
 
   // Extract tickers from concepts and auto-select the latest one
   const detectedTickers = useMemo(() => extractTickersFromConcepts(concepts), [concepts]);
@@ -339,6 +367,7 @@ function LiveCallPage() {
   }, [transcriptLines, partial]);
 
   const handleStart = () => {
+    clearSession(); // clear any previous session
     start(); // uses default text file
   };
 
@@ -358,7 +387,7 @@ function LiveCallPage() {
 
       {/* Header */}
       <header
-        className="flex items-center justify-between px-8 py-4 text-white"
+        className="shrink-0 flex items-center justify-between px-8 py-4 text-white"
         style={{
           background: "rgba(10, 18, 64, 0.98)",
           borderBottom: "1px solid rgba(184,149,90,0.2)",
@@ -544,7 +573,7 @@ function LiveCallPage() {
             {isDone && transcriptLines.length > 0 && (
               <div className="flex items-center gap-2 pt-6 text-xs" style={{ color: "#6B7280" }}>
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                Pipeline complete — {concepts.length} concepts detected
+                Call ended — {concepts.length} strong intent signal detected
               </div>
             )}
 
