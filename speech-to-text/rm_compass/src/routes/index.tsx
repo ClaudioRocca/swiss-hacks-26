@@ -309,7 +309,7 @@ function LiveCallPage() {
   // trigger and on widget click; cleared after a few seconds.
   const [flashConcept, setFlashConcept] = useState<number | null>(null);
   const flashTimer = useRef<number | null>(null);
-  const lineRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
+  const lineRefs = useRef<Map<number, HTMLElement | null>>(new Map());
   // True while a user-clicked flash holds, so auto-scroll yields to the click.
   const clickHoldRef = useRef(false);
 
@@ -474,70 +474,96 @@ function LiveCallPage() {
               </div>
             )}
 
-            {transcriptLines.map((line, i) => {
-              const isRM = line.speaker === "rm";
-              const conceptIdx = lineToConcept.get(i);
-              const cColor = conceptIdx != null ? colorForConcept(conceptIdx) : null;
-              const isFlashed = conceptIdx != null && conceptIdx === flashConcept;
-              return (
-                <div
-                  key={i}
-                  ref={(el) => { lineRefs.current.set(i, el); }}
-                  className="flex animate-fade-up py-1.5"
-                  style={{
-                    animationDelay: `${Math.min(i, 5) * 30}ms`,
-                    justifyContent: isRM ? "flex-end" : "flex-start",
-                  }}
-                >
+            {(() => {
+              // Group consecutive lines from the same speaker into a single bubble.
+              const groups: { speaker: string; startIdx: number; lines: typeof transcriptLines }[] = [];
+              for (let i = 0; i < transcriptLines.length; i++) {
+                const line = transcriptLines[i];
+                const prev = groups[groups.length - 1];
+                if (prev && prev.speaker === line.speaker) {
+                  prev.lines.push(line);
+                } else {
+                  groups.push({ speaker: line.speaker, startIdx: i, lines: [line] });
+                }
+              }
+
+              return groups.map((group) => {
+                const isRM = group.speaker === "rm";
+                const firstConceptIdx = lineToConcept.get(group.startIdx);
+                const cColor = firstConceptIdx != null ? colorForConcept(firstConceptIdx) : null;
+                const isFlashed = group.lines.some((_, j) => {
+                  const idx = group.startIdx + j;
+                  const ci = lineToConcept.get(idx);
+                  return ci != null && ci === flashConcept;
+                });
+                const timestamp = group.lines[0].timestamp;
+
+                return (
                   <div
-                    className="max-w-[78%] transition-all duration-300"
-                    style={{ transform: isFlashed ? "scale(1.025)" : "scale(1)" }}
+                    key={group.startIdx}
+                    ref={(el) => { lineRefs.current.set(group.startIdx, el); }}
+                    className="flex animate-fade-up py-1.5"
+                    style={{
+                      animationDelay: `${Math.min(group.startIdx, 5) * 30}ms`,
+                      justifyContent: isRM ? "flex-end" : "flex-start",
+                    }}
                   >
                     <div
-                      className="flex items-baseline gap-2 mb-0.5"
-                      style={{ flexDirection: isRM ? "row-reverse" : "row" }}
+                      className="max-w-[78%] transition-all duration-300"
+                      style={{ transform: isFlashed ? "scale(1.025)" : "scale(1)" }}
                     >
-                      <span
-                        className="text-[10px] font-semibold uppercase tracking-wider"
-                        style={{ color: isRM ? NAVY : MUTE }}
+                      <div
+                        className="flex items-baseline gap-2 mb-0.5"
+                        style={{ flexDirection: isRM ? "row-reverse" : "row" }}
                       >
-                        {isRM ? "Relationship Manager" : "Client"}
-                      </span>
-                      <span className="text-[10px] tabular" style={{ color: "#9CA3AF" }}>
-                        {line.timestamp}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        background: isFlashed
-                          ? (cColor ? `${cColor}22` : undefined)
-                          : (isRM ? NAVY : STONE),
-                        color: isFlashed ? "#1C1C2E" : (isRM ? "#FFFFFF" : "#1C1C2E"),
-                        border: isFlashed && cColor
-                          ? `1px solid ${cColor}`
-                          : (isRM ? "none" : `1px solid ${LINE}`),
-                        borderRadius: 16,
-                        borderTopRightRadius: isRM ? 4 : 16,
-                        borderTopLeftRadius: isRM ? 16 : 4,
-                        // persistent thin accent tying the line to its widget's color
-                        borderRightWidth: !isRM && cColor ? 0 : undefined,
-                        borderLeft: !isRM && cColor ? `3px solid ${cColor}` : undefined,
-                        borderRight: isRM && cColor ? `3px solid ${cColor}` : undefined,
-                        padding: "8px 12px",
-                        fontSize: 14,
-                        lineHeight: 1.6,
-                        boxShadow: isFlashed && cColor
-                          ? `0 0 0 3px ${cColor}33, 0 2px 8px rgba(10,18,64,0.12)`
-                          : "0 1px 2px rgba(10,18,64,0.06)",
-                        transition: "all 300ms",
-                      }}
-                    >
-                      {highlight(line.text)}
+                        <span
+                          className="text-[10px] font-semibold uppercase tracking-wider"
+                          style={{ color: isRM ? NAVY : MUTE }}
+                        >
+                          {isRM ? "You" : "Maximilian Keller"}
+                        </span>
+                        <span className="text-[10px] tabular" style={{ color: "#9CA3AF" }}>
+                          {timestamp}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          background: isFlashed
+                            ? (cColor ? `${cColor}22` : undefined)
+                            : (isRM ? NAVY : STONE),
+                          color: isFlashed ? "#1C1C2E" : (isRM ? "#FFFFFF" : "#1C1C2E"),
+                          border: isFlashed && cColor
+                            ? `1px solid ${cColor}`
+                            : (isRM ? "none" : `1px solid ${LINE}`),
+                          borderRadius: 16,
+                          borderTopRightRadius: isRM ? 4 : 16,
+                          borderTopLeftRadius: isRM ? 16 : 4,
+                          borderLeft: !isRM && cColor ? `3px solid ${cColor}` : undefined,
+                          borderRight: isRM && cColor ? `3px solid ${cColor}` : undefined,
+                          padding: "8px 12px",
+                          fontSize: 14,
+                          lineHeight: 1.6,
+                          boxShadow: isFlashed && cColor
+                            ? `0 0 0 3px ${cColor}33, 0 2px 8px rgba(10,18,64,0.12)`
+                            : "0 1px 2px rgba(10,18,64,0.06)",
+                          transition: "all 300ms",
+                        }}
+                      >
+                        {group.lines.map((line, j) => (
+                          <span
+                            key={group.startIdx + j}
+                            ref={(el) => { if (j > 0) lineRefs.current.set(group.startIdx + j, el); }}
+                          >
+                            {j > 0 && " "}
+                            {highlight(line.text)}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              });
+            })()}
 
             {/* Partial (in-progress) line — client side */}
             {partial && (

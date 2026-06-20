@@ -37,9 +37,8 @@ export type PostCallAnalysis = {
     overall_score: number;
     overall_label: string;
     bands: Array<{
-      from_percent: number;
-      to_percent: number;
-      tone: "positive" | "neutral" | "concerned";
+      at_percent: number;
+      score: number;
     }>;
     peaks: Array<{
       at_percent: number;

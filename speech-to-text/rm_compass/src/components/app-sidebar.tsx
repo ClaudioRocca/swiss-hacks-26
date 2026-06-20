@@ -21,7 +21,7 @@ export function AppSidebar() {
 
   return (
     <aside
-      className="flex h-screen w-64 shrink-0 flex-col"
+      className="flex w-64 shrink-0 flex-col"
       style={{ background: "#FFFFFF", borderRight: `1px solid ${LINE}`, color: INK }}
     >
       <div className="flex flex-col gap-6 px-7 pt-8 pb-6" style={{ borderBottom: `1px solid ${LINE}` }}>
