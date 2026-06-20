@@ -49,19 +49,37 @@ _EXTRACT_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
     "properties": {
+        "is_filler": {
+            "type": "boolean",
+            "description": (
+                "true if this slice is ONLY a greeting/pleasantry/acknowledgement "
+                "with no substantive concept (e.g. 'hello, how are you', 'thanks, "
+                "bye'). false if it carries any real topic/request/information."
+            ),
+        },
         "topic": {"type": "string", "description": "2-5 word concept label"},
         "summary": {"type": "string", "description": "one-sentence summary"},
         "intent": {"type": "string", "description": "what the speaker wants/means"},
         "entities": {"type": "array", "items": {"type": "string"}},
     },
-    "required": ["topic", "summary", "intent", "entities"],
+    "required": ["is_filler", "topic", "summary", "intent", "entities"],
 }
+
+# fixed seed + temperature 0 => near-reproducible judge/extract calls
+DEFAULT_SEED = int(os.getenv("AGENT_SEED", "7"))
 
 
 class ConceptSegmenter:
-    def __init__(self, on_trigger: TriggerCb, *, model: str = JUDGE_MODEL):
+    def __init__(
+        self,
+        on_trigger: TriggerCb,
+        *,
+        model: str = JUDGE_MODEL,
+        seed: int = DEFAULT_SEED,
+    ):
         self.on_trigger = on_trigger
         self.model = model
+        self.seed = seed
         self.client = AsyncOpenAI()
         self._buffer: List[str] = []
         self._emitted = 0
@@ -94,7 +112,9 @@ class ConceptSegmenter:
         self._buffer = []
         if not text:
             return
-        chunk = await self._extract(text)
+        chunk, is_filler = await self._extract(text)
+        if is_filler:
+            return  # drop greetings/pleasantries — no trigger
         chunk.index = self._emitted
         self._emitted += 1
         await _maybe_await(self.on_trigger(chunk))
@@ -103,6 +123,7 @@ class ConceptSegmenter:
         resp = await self.client.chat.completions.create(
             model=self.model,
             temperature=0,
+            seed=self.seed,
             response_format={
                 "type": "json_schema",
                 "json_schema": {
@@ -118,7 +139,11 @@ class ConceptSegmenter:
                         "You segment a live transcript by concept. Given the CURRENT "
                         "concept so far and the NEXT utterance, decide if the next "
                         "utterance starts a clearly different topic/concept. Minor "
-                        "elaboration or follow-up is NOT a new topic."
+                        "elaboration or follow-up is NOT a new topic.\n"
+                        "RULE: a greeting/pleasantry (e.g. 'hello, how are you', "
+                        "'thanks, bye') is ALWAYS its own segment — if CURRENT is only "
+                        "a greeting/pleasantry and NEXT carries any real content, that "
+                        "IS a new topic. Likewise NEXT being a greeting is a boundary."
                     ),
                 },
                 {
@@ -130,10 +155,11 @@ class ConceptSegmenter:
         data = json.loads(resp.choices[0].message.content)
         return bool(data["is_new_topic"])
 
-    async def _extract(self, text: str) -> ConceptChunk:
+    async def _extract(self, text: str) -> tuple[ConceptChunk, bool]:
         resp = await self.client.chat.completions.create(
             model=self.model,
             temperature=0,
+            seed=self.seed,
             response_format={
                 "type": "json_schema",
                 "json_schema": {
@@ -145,19 +171,24 @@ class ConceptSegmenter:
             messages=[
                 {
                     "role": "system",
-                    "content": "Extract the core concept from this transcript slice.",
+                    "content": (
+                        "Extract the core concept from this transcript slice. Set "
+                        "is_filler=true only if the slice is purely a greeting or "
+                        "pleasantry with no substantive content."
+                    ),
                 },
                 {"role": "user", "content": text},
             ],
         )
         data = json.loads(resp.choices[0].message.content)
-        return ConceptChunk(
+        chunk = ConceptChunk(
             text=text,
             topic=data["topic"],
             summary=data["summary"],
             intent=data["intent"],
             entities=data["entities"],
         )
+        return chunk, bool(data["is_filler"])
 
 
 async def _maybe_await(value) -> None:
