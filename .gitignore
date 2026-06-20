@@ -12,9 +12,16 @@ __pycache__/
 venv/
 
 # databases
-speech-to-text/data/chroma/
-speech-to-text/data/*.db
+backend/data/chroma/
+backend/data/*.db
 
 # pipeline results
-speech-to-text/results/
-speech-to-text/pipeline_results.json
+backend/results/
+backend/pipeline_results.json
+
+# docker
+docker-compose.override.yml
+
+# frontend
+frontend/node_modules/
+frontend/dist/
