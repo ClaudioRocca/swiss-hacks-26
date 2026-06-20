@@ -10,3 +10,11 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# databases
+speech-to-text/data/chroma/
+speech-to-text/data/*.db
+
+# pipeline results
+speech-to-text/results/
+speech-to-text/pipeline_results.json

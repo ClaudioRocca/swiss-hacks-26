@@ -218,7 +218,7 @@ async def main() -> int:
         default="client_calls/call_4_wealth_management.txt",
         help="conversation .txt file (default: call_4)",
     )
-    p.add_argument("--out", default="pipeline_results.json", help="JSON output path")
+    p.add_argument("--out", default="results/pipeline_results.json", help="JSON output path")
     p.add_argument(
         "--now",
         default="2025-05-26",
@@ -246,7 +246,9 @@ async def main() -> int:
         "query_count": sum(len(c["executed_queries"]) for c in concepts),
         "concepts": concepts,
     }
-    Path(args.out).write_text(json.dumps(payload, indent=2, ensure_ascii=False, default=str))
+    out_path = Path(args.out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False, default=str))
 
     _print_summary(concepts)
     print("\n" + "=" * 70)
