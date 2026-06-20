@@ -60,7 +60,7 @@ PORTFOLIO_POSITIONS = [
     {"ticker": "ZURN", "quantity": 600, "purchase_price": 450.20, "current_price": 478.60, "currency": "CHF", "sector": "insurance"},
     {"ticker": "AAPL", "quantity": 500, "purchase_price": 142.50, "current_price": 198.30, "currency": "USD", "sector": "technology"},
     {"ticker": "MSFT", "quantity": 300, "purchase_price": 280.00, "current_price": 430.50, "currency": "USD", "sector": "technology"},
-    {"ticker": "ASML", "quantity": 150, "purchase_price": 580.00, "current_price": 645.20, "currency": "EUR", "sector": "technology"},
+    {"ticker": "NVDA", "quantity": 400, "purchase_price": 95.00, "current_price": 145.00, "currency": "USD", "sector": "technology"},
 ]
 
 REAL_ESTATE_INVESTMENTS = [
@@ -118,7 +118,7 @@ TRADE_OPERATIONS = [
     {"ticker": "ROP", "quantity": 50, "value": 12945.00, "operation_type": "buy", "timestamp": "2025-05-17T11:00:00Z"},
     {"ticker": "NOVN", "quantity": 200, "value": 18290.00, "operation_type": "buy", "timestamp": "2025-05-16T09:45:00Z"},
     {"ticker": "MSFT", "quantity": 50, "value": 21525.00, "operation_type": "sell", "timestamp": "2025-05-15T15:30:00Z"},
-    {"ticker": "ASML", "quantity": 30, "value": 19356.00, "operation_type": "buy", "timestamp": "2025-05-14T10:15:00Z"},
+    {"ticker": "NVDA", "quantity": 100, "value": 14500.00, "operation_type": "buy", "timestamp": "2025-05-14T10:15:00Z"},
     {"ticker": "ZURN", "quantity": 100, "value": 47860.00, "operation_type": "sell", "timestamp": "2025-05-13T13:00:00Z"},
     {"ticker": "NESN", "quantity": 300, "value": 29550.00, "operation_type": "short_sell", "timestamp": "2025-05-12T09:30:00Z"},
     {"ticker": "NESN", "quantity": 300, "value": 32340.00, "operation_type": "short_cover", "timestamp": "2025-05-20T16:00:00Z"},
@@ -134,7 +134,7 @@ MARKET_MOVEMENTS = [
     {"ticker": "ZURN", "company_name": "Zurich Insurance Group", "sector": "insurance", "price_change": -5.40, "percentage_change": -1.12, "current_price": 478.60, "volume": 980000, "timestamp": "2025-05-26T16:30:00Z"},
     {"ticker": "AAPL", "company_name": "Apple Inc.", "sector": "technology", "price_change": 4.20, "percentage_change": 2.16, "current_price": 198.30, "volume": 52000000, "timestamp": "2025-05-26T20:00:00Z"},
     {"ticker": "MSFT", "company_name": "Microsoft Corp.", "sector": "technology", "price_change": -3.50, "percentage_change": -0.81, "current_price": 430.50, "volume": 28000000, "timestamp": "2025-05-26T20:00:00Z"},
-    {"ticker": "ASML", "company_name": "ASML Holding NV", "sector": "technology", "price_change": 12.40, "percentage_change": 1.96, "current_price": 645.20, "volume": 3400000, "timestamp": "2025-05-26T17:30:00Z"},
+    {"ticker": "NVDA", "company_name": "NVIDIA Corp.", "sector": "technology", "price_change": 5.20, "percentage_change": 3.72, "current_price": 145.00, "volume": 41000000, "timestamp": "2025-05-26T20:00:00Z"},
     {"ticker": "CSGN", "company_name": "Credit Suisse (legacy)", "sector": "financials", "price_change": -0.02, "percentage_change": -2.50, "current_price": 0.78, "volume": 150000, "timestamp": "2025-05-26T16:30:00Z"},
     {"ticker": "SREN", "company_name": "Swiss Re AG", "sector": "insurance", "price_change": 1.80, "percentage_change": 1.45, "current_price": 125.80, "volume": 1200000, "timestamp": "2025-05-26T16:30:00Z"},
     {"ticker": "ABBN", "company_name": "ABB Ltd", "sector": "industrials", "price_change": -2.10, "percentage_change": -3.85, "current_price": 52.50, "volume": 5600000, "timestamp": "2025-05-26T16:30:00Z"},
@@ -175,8 +175,8 @@ NEWS_ARTICLES = [
         "metadata": {"source": "CNBC", "category": "equity", "published_date": "2025-05-19", "tickers_mentioned": "AAPL"},
     },
     {
-        "text": "ASML reports record backlog of EUR 56 billion as chip manufacturers race to secure EUV lithography capacity. The Dutch company raised its 2025 revenue guidance by 8%, citing strong demand from AI infrastructure buildout.",
-        "metadata": {"source": "Bloomberg", "category": "equity", "published_date": "2025-05-18", "tickers_mentioned": "ASML"},
+        "text": "NVIDIA reports record data-center GPU demand as the AI buildout accelerates, with quarterly revenue up 78% year over year. The chipmaker said its next-generation Blackwell GPUs are sold out through 2025.",
+        "metadata": {"source": "Bloomberg", "category": "equity", "published_date": "2025-05-18", "tickers_mentioned": "NVDA"},
     },
     {
         "text": "Geopolitical tensions in the South China Sea escalate as naval exercises intensify. Swiss defense stocks and gold ETFs see inflows as investors seek safe-haven assets. The Swiss franc strengthened 0.8% against the euro on risk-off sentiment.",
