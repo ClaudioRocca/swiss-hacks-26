@@ -1,0 +1,41 @@
+CLIENT CALL #1 — Insurance Claim + Policy Upgrade + Address Change
+===================================================================
+
+SCENARIO: A customer calls their car insurance company after a minor
+accident. The call naturally shifts through three distinct topics.
+
+Read this naturally, as if you're actually on the phone. Pause briefly
+between sentences. Pause a bit longer between the [TOPIC SHIFT] markers.
+
+---
+
+Hi, good afternoon. My name is Alessandro Rocca, and I'm calling about
+a car accident I was involved in earlier today. My policy number is
+CH dash seven four two nine one. So what happened is, I was driving on
+the A2 motorway near Lugano, and a car in front of me braked suddenly.
+I couldn't stop in time and I rear-ended them at low speed, maybe
+twenty or thirty kilometers per hour. Nobody was hurt, thankfully, but
+my front bumper is pretty damaged, and the other driver's rear light is
+cracked. I already took photos of both vehicles and I have the other
+driver's details. His name is Marco Bernasconi, and his plate number is
+TI three five seven eight nine two. I'd like to file a claim and
+understand what the next steps are.
+
+[TOPIC SHIFT — pause 2 seconds]
+
+Actually, while I have you on the line, I also wanted to ask about
+upgrading my coverage. Right now I have third-party liability only, but
+after what happened today, I'm thinking I should probably get
+comprehensive coverage — you know, full kasko. Could you tell me how
+much extra that would cost per month? And does it cover things like
+hail damage and theft as well? I drive a 2022 Volkswagen Golf, if that
+matters for the quote.
+
+[TOPIC SHIFT — pause 2 seconds]
+
+Oh, one more thing before we finish. I moved apartments last month and
+I need to update my billing address. The new address is Via Nassa
+fifteen, sixty-nine hundred Lugano. Can you update that in the system?
+And could you also send the next invoice to my new email, which is
+a dot rocca at gmail dot com? That would be great. Thank you so much
+for your help.

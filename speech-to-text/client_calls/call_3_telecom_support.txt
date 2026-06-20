@@ -1,0 +1,49 @@
+CLIENT CALL #3 — Internet Outage + Mobile Plan Upgrade + Billing Dispute
+==========================================================================
+
+SCENARIO: A frustrated customer calls their telecom provider about
+ongoing connectivity problems. The call shifts through three topics.
+
+Read this naturally, as if you're actually on the phone. Pause briefly
+between sentences. Pause a bit longer between the [TOPIC SHIFT] markers.
+Start with a slightly frustrated tone for the first part.
+
+---
+
+Hi, yes, I'd like to report an issue with my internet connection.
+My name is Alessandro Rocca, and my customer number is eight zero
+six one four three. I've been having problems with my home internet
+for the past three days now. The connection keeps dropping every
+twenty to thirty minutes, and when it is working, the speed is
+terrible — I ran a speed test and I'm only getting about twelve
+megabits per second, but I'm paying for the one-gigabit fiber plan.
+I've already tried restarting the router multiple times, and I even
+did a factory reset yesterday, but nothing changed. I work from home
+as a software developer, and this is really affecting my ability to
+do my job. I need someone to look into this urgently. My address is
+Bahnhofstrasse forty-two, eight thousand and one Zurich. Could you
+send a technician as soon as possible?
+
+[TOPIC SHIFT — pause 2 seconds]
+
+Okay, while we sort that out, I also wanted to ask about my mobile
+plan. I'm currently on the basic plan with five gigabytes of data per
+month, but honestly that's not enough anymore. I keep running out of
+data by the third week. What options do you have for unlimited data
+plans? And I travel to Italy and Germany pretty often for work, so
+I'd need something that includes European roaming without extra
+charges. Also, is it possible to keep my current phone number if I
+switch plans? The number is zero seven nine three four five six seven
+eight nine.
+
+[TOPIC SHIFT — pause 2 seconds]
+
+Actually, speaking of plans, I just looked at my last invoice and I
+think there's a mistake. The bill from May shows a charge of
+forty-five francs for something called "Premium Services," but I
+never signed up for any premium services. I have no idea what that is.
+The invoice number is INV dash two zero two six dash zero five dash
+one seven eight nine. Could you check what that charge is for and
+remove it if it's an error? Because I definitely didn't authorize it.
+If there's been an overcharge, I'd like a credit applied to my next
+bill. Thank you.

@@ -1,0 +1,45 @@
+CLIENT CALL #2 — Suspicious Transaction + Mortgage Inquiry + Standing Order
+=============================================================================
+
+SCENARIO: A customer calls their bank after noticing a strange charge
+on their account. The call naturally evolves through three topics.
+
+Read this naturally, as if you're actually on the phone. Pause briefly
+between sentences. Pause a bit longer between the [TOPIC SHIFT] markers.
+
+---
+
+Hello, yes, hi. I'm calling because I just noticed a charge on my
+current account that I don't recognize at all. My name is Alessandro
+Rocca, account number four four dash seven eight one three six zero.
+The transaction was on June eighteenth, for two hundred and forty-nine
+Swiss francs, and it says it's from something called "DigiStore
+Twenty-Four" based in Germany. I've never heard of this company, and
+I definitely didn't authorize any purchase for that amount. I'm
+worried someone might have gotten hold of my card details. The card
+ends in eight three four seven. Could you please look into this and
+block the card if necessary? I really don't want any more charges
+going through.
+
+[TOPIC SHIFT — pause 2 seconds]
+
+Alright, thank you for taking care of that. Now, on a completely
+different topic — my partner and I are looking to buy an apartment
+here in Zurich, and I wanted to get some information about your
+mortgage offers. We're looking at a property in Oerlikon that's
+listed at around one point two million francs, and we have about
+three hundred thousand saved for the down payment. What kind of
+interest rate could we get on a ten-year fixed mortgage? And what
+documents would we need to bring in to start the application process?
+We're both employed, if that helps — I work in software engineering
+and she's a doctor at the Universitätsspital.
+
+[TOPIC SHIFT — pause 2 seconds]
+
+Perfect, I'll gather those documents. Oh, actually, one last thing.
+I need to set up a monthly standing order from my current account to
+my landlord. His name is Thomas Keller, and his IBAN is CH nine three
+zero zero seven six seven zero one two three four five six seven eight
+nine zero. The amount should be two thousand one hundred francs on the
+first of every month, starting July first. Can you set that up for me
+right now? Thank you, you've been very helpful.
