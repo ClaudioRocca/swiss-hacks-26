@@ -304,7 +304,7 @@ function LiveCallPage() {
         concepts,
         customerProfile,
         callDurationSeconds: elapsed,
-        clientName: "Mr. Alessandro Ferretti",
+        clientName: "Dr. Maximilian Keller",
       });
     }
     if (isIdle) {
@@ -404,7 +404,7 @@ function LiveCallPage() {
       >
         <div className="flex items-center gap-6">
           <div>
-            <div className="font-serif text-white" style={{ fontSize: 22 }}>Mr. Alessandro Ferretti</div>
+            <div className="font-serif text-white" style={{ fontSize: 22 }}>Dr. Maximilian Keller</div>
           </div>
           {isDone || callEnded ? (
             <div

@@ -15,13 +15,13 @@ const PRIORITY = {
 } as const;
 
 const ITEMS: Array<{ priority: keyof typeof PRIORITY; text: string; client: string; due: string }> = [
-  { priority: "HIGH", text: "Prepare gold allocation proposal (5–8% portfolio)", client: "A. Ferretti", due: "Jun 24" },
-  { priority: "HIGH", text: "Schedule Dubai property viewing — Q3 2026", client: "A. Ferretti", due: "Jul 02" },
+  { priority: "HIGH", text: "Prepare gold allocation proposal (5–8% portfolio)", client: "M. Keller", due: "Jun 24" },
+  { priority: "HIGH", text: "Schedule Dubai property viewing — Q3 2026", client: "M. Keller", due: "Jul 02" },
   { priority: "HIGH", text: "Review margin facility renewal terms", client: "H. Brunner", due: "Jun 25" },
-  { priority: "MED", text: "Book estate planning consultation with legal team", client: "A. Ferretti", due: "Jul 15" },
+  { priority: "MED", text: "Book estate planning consultation with legal team", client: "M. Keller", due: "Jul 15" },
   { priority: "MED", text: "Send Q2 macro outlook deck", client: "Y. Demir", due: "Jul 05" },
   { priority: "MED", text: "Confirm KYC refresh signatures", client: "H. Brunner", due: "Jul 08" },
-  { priority: "LOW", text: "Send quarterly performance report", client: "A. Ferretti", due: "Jul 30" },
+  { priority: "LOW", text: "Send quarterly performance report", client: "M. Keller", due: "Jul 30" },
 ];
 
 function ActionItemsPage() {

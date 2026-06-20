@@ -1,11 +1,11 @@
 Client: Dr. Maximilian Keller
-Relationship Manager: Sophie Lambert
+Relationship Manager: Sofia Lambro
 Call type: portfolio review + market/news check (two-way)
 ---
 
 RM: Good morning, Dr. Keller. Thank you for making the time. How can I help you today?
 
-Client: Morning, Sophie. Let's start with my UBS position. I saw the headlines that UBS just completed the final integration phase of the Credit Suisse wealth management operations, and I want to understand what that means for my holding.
+Client: Morning, Sofia. Let's start with my UBS position. I saw the headlines that UBS just completed the final integration phase of the Credit Suisse wealth management operations, and I want to understand what that means for my holding.
 
 RM: Absolutely. Let me pull that up for you right now.
 
@@ -41,6 +41,6 @@ Client: And finally, given all the talk about chip supply, could you check the l
 
 RM: Good idea. I'll find the most recent ASML and semiconductor news so you can weigh that before we close out the week.
 
-Client: Thank you, Sophie. That covers everything for now.
+Client: Thank you, Sofia. That covers everything for now.
 
 RM: My pleasure, Dr. Keller. I'll send a written summary right after the call.

@@ -1,15 +1,15 @@
 Client: Dr. Maximilian Keller
-Relationship Manager: Sophie Lambert
+Relationship Manager: Sofia Lambro
 Call type: portfolio review — RM reads the surfaced data back to the client (demo)
 ---
 
 RM: Good morning, Dr. Keller. Lovely to hear from you.
 
-Client: Morning, Sophie! Good to hear your voice. Before we get to business — I'm a grandfather now, if you can believe it. Little Emma arrived in April. It changes how you look at everything, Sophie; you start thinking less about the next quarter and more about the next generation. Truth be told, I find myself wanting a steadier, more cautious hand on things from here on.
+Client: Morning, Sofia! Good to hear your voice. Before we get to business — I'm a grandfather now, if you can believe it. Little Emma arrived in April. It changes how you look at everything, Sofia; you start thinking less about the next quarter and more about the next generation. Truth be told, I find myself wanting a steadier, more cautious hand on things from here on.
 
 RM: Congratulations, Dr. Keller — that is wonderful news. And understood; we'll keep a careful eye on risk.
 
-Client: Thank you, Sophie. Right, to business — let's begin with UBS: pull up my UBSG holding and tell me where the unrealized profit or loss is sitting today.
+Client: Thank you, Sofia. Right, to business — let's begin with UBS: pull up my UBSG holding and tell me where the unrealized profit or loss is sitting today.
 
 RM: Of course, let me pull that up for you.
 
@@ -45,7 +45,7 @@ RM: Searching the latest now.
 
 RM: Two headlines: Bloomberg reports Novartis posted stronger-than-expected first quarter results with core operating income up 15 percent. And the Financial Times reports Roche's new Alzheimer's drug received FDA breakthrough designation, with Phase 3 data showing a 35 percent reduction in cognitive decline.
 
-Client: Encouraging news indeed — my old bridge partner would have given anything for that. One last thing before I let you go, Sophie: pull up my active commercial property in Geneva. I keep going back and forth on whether to hold it.
+Client: Encouraging news indeed — my old bridge partner would have given anything for that. One last thing before I let you go, Sofia: pull up my active commercial property in Geneva. I keep going back and forth on whether to hold it.
 
 RM: Let me filter your active commercial holdings in Geneva.
 
@@ -57,6 +57,6 @@ RM: Pulling the most recent ASML coverage now.
 
 RM: Bloomberg reports ASML posted a record backlog of EUR 56 billion as chip manufacturers race to secure EUV lithography capacity. For reference, you currently hold 150 ASML shares at EUR 645.20.
 
-Client: Wonderful — that's the lot, Sophie. You've been a gem, as always; do give my regards to the team.
+Client: Wonderful — that's the lot, Sofia. You've been a gem, as always; do give my regards to the team.
 
 RM: My pleasure, Dr. Keller. I'll send a written summary right after the call.

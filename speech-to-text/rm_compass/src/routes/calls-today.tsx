@@ -8,7 +8,7 @@ export const Route = createFileRoute("/calls-today")({
 
 const CALLS = [
   { time: "09:15", client: "Mrs. Helena Brunner", duration: "32:14", status: "Completed" },
-  { time: "11:00", client: "Mr. Alessandro Ferretti", duration: "47:02", status: "Active" },
+  { time: "11:00", client: "Dr. Maximilian Keller", duration: "47:02", status: "Active" },
   { time: "14:30", client: "Mr. Yusuf Demir", duration: "21:48", status: "Completed" },
 ];
 

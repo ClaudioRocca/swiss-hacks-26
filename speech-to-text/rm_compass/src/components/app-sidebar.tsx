@@ -127,7 +127,7 @@ export function AppSidebar() {
             AF
           </div>
           <div className="min-w-0">
-            <div className="truncate text-sm font-medium text-white">Mr. A. Ferretti</div>
+            <div className="truncate text-sm font-medium text-white">Dr. M. Keller</div>
             <div className="flex items-center gap-1.5 text-[11px] text-white/60">
               <span className={"h-1.5 w-1.5 rounded-full " + (callEnded ? "bg-white/40" : "animate-blink bg-danger")} />
               {callEnded ? "Call ended" : "Active call"}
