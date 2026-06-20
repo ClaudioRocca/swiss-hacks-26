@@ -1,0 +1,125 @@
+{
+  "declared_risk_appetite": "moderate",
+  "onboarding": {
+    "date": "2024-06-19",
+    "score": 6.0,
+    "appetite": "moderate",
+    "source": "onboarding",
+    "note": "Initial onboarding assessment."
+  },
+  "series": [
+    {
+      "date": "2024-06-19",
+      "score": 6.0,
+      "appetite": "moderate",
+      "source": "onboarding",
+      "note": "Initial onboarding assessment."
+    },
+    {
+      "date": "2024-07-15",
+      "score": 6.0,
+      "appetite": "moderate",
+      "source": "call",
+      "note": "Onboarding follow-up; client sets out a balanced, moderate, long-term mandate around Swiss blue chips, healthcare and some US tech."
+    },
+    {
+      "date": "2024-09-10",
+      "score": 5.8,
+      "appetite": "moderate",
+      "source": "call",
+      "note": "First portfolio review; client pleased with steady performance and comfortable holding the balanced allocation."
+    },
+    {
+      "date": "2024-11-12",
+      "score": 5.7,
+      "appetite": "moderate",
+      "source": "call",
+      "note": "Client raises equity concentration and an interest in broadening into real assets and alternatives."
+    },
+    {
+      "date": "2025-01-20",
+      "score": 5.5,
+      "appetite": "moderate",
+      "source": "call",
+      "note": "Volatility prompts mild de-risking; client first raises his art collection and wine cellar as possible wealth."
+    },
+    {
+      "date": "2025-03-18",
+      "score": 5.4,
+      "appetite": "moderate",
+      "source": "call",
+      "note": "Brief check-in; client wary of headlines and unwilling to add new risk, preferring to hold quality."
+    },
+    {
+      "date": "2025-05-14",
+      "score": 5.2,
+      "appetite": "moderate",
+      "source": "call",
+      "note": "Client first voices unease about the size of the tech position and is open to trimming concentration gradually."
+    },
+    {
+      "date": "2025-07-22",
+      "score": 5.0,
+      "appetite": "moderate",
+      "source": "call",
+      "note": "Client signals a clearer preference for stability over growth and asks to keep tilting toward steadier holdings."
+    },
+    {
+      "date": "2025-09-16",
+      "score": 4.8,
+      "appetite": "moderate",
+      "source": "call",
+      "note": "Summer volatility nudges the client further toward protection; reaffirms ESG preferences alongside a low-beta, quality stance."
+    },
+    {
+      "date": "2025-11-11",
+      "score": 4.6,
+      "appetite": "conservative",
+      "source": "call",
+      "note": "Client crosses into a conservative stance, prioritising capital preservation and ESG over higher-beta tech."
+    },
+    {
+      "date": "2026-03-10",
+      "score": 4.5,
+      "appetite": "conservative",
+      "source": "call",
+      "note": "Client firmly confirms the conservative, preservation-first stance and asks for ballast uncorrelated with equities."
+    },
+    {
+      "date": "2026-06-19",
+      "score": 4.2,
+      "appetite": "conservative",
+      "source": "call",
+      "note": "Pipeline-inferred from the last call."
+    }
+  ],
+  "trend": {
+    "from_date": "2024-06-19",
+    "from_score": 6.0,
+    "to_date": "2026-06-19",
+    "to_score": 4.2,
+    "total_delta": -1.8,
+    "direction": "decreasing (more conservative)",
+    "n_points": 12,
+    "per_step_deltas": [
+      0.0,
+      -0.2,
+      -0.1,
+      -0.2,
+      -0.1,
+      -0.2,
+      -0.2,
+      -0.2,
+      -0.2,
+      -0.1,
+      -0.3
+    ]
+  },
+  "latest_point": {
+    "date": "2026-06-19",
+    "score": 4.2,
+    "appetite": "conservative",
+    "source": "call",
+    "note": "Pipeline-inferred from the last call."
+  }
+}

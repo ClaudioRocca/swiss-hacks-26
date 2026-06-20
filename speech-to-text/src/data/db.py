@@ -30,7 +30,7 @@ _VALID_DIRECTIONS = {"up", "down"}
 _COLLECTION_NAME = "market_news"
 
 # Cosine similarity threshold for news search
-_SIMILARITY_THRESHOLD = 0.3
+_SIMILARITY_THRESHOLD = 0.4
 
 
 def _get_sqlite_connection() -> sqlite3.Connection:
@@ -426,6 +426,51 @@ def search_news(
     return output
 
 
+def get_news_by_ticker(ticker: str) -> list[dict]:
+    """Return every news article whose `tickers_mentioned` includes `ticker`.
+
+    Deterministic, grounded lookup behind portfolio-keyed collision detection: no
+    embedding/semantic step. Matches on exact ticker membership after splitting the
+    comma-separated metadata field, so it is robust to multi-ticker articles (and
+    to ChromaDB's metadata filter quirks). Results are sorted most-recent first by
+    published_date. Raises DataLayerError if ChromaDB is unreachable.
+    """
+    target = (ticker or "").strip().upper()
+    if not target:
+        return []
+    try:
+        collection = _get_chroma_collection()
+        got = collection.get(include=["documents", "metadatas"])
+    except DataLayerError:
+        raise
+    except Exception as e:
+        raise DataLayerError(f"ChromaDB query failed: {e}")
+
+    documents = got.get("documents") or []
+    metadatas = got.get("metadatas") or [{}] * len(documents)
+
+    out = []
+    for doc, metadata in zip(documents, metadatas):
+        mentioned = [
+            t.strip().upper()
+            for t in (metadata.get("tickers_mentioned", "") or "").split(",")
+            if t.strip()
+        ]
+        if target in mentioned:
+            out.append({
+                "document": doc,
+                "metadata": {
+                    "source": metadata.get("source", ""),
+                    "category": metadata.get("category", ""),
+                    "published_date": metadata.get("published_date", ""),
+                    "tickers_mentioned": metadata.get("tickers_mentioned", ""),
+                },
+            })
+
+    out.sort(key=lambda a: a["metadata"].get("published_date", ""), reverse=True)
+    return out
+
+
 def _loads(value):
     """Best-effort parse of a JSON text column; returns None on empty/invalid."""
     if not value:
@@ -502,7 +547,6 @@ def get_call(call_id: int) -> dict:
             return {}
         result = dict(row)
         result["topics"] = _loads(result.get("topics")) or []
-        result["facts"] = _loads(result.get("facts_json"))
         result["insights"] = _loads(result.get("insights_json"))
         return result
     except sqlite3.OperationalError as e:
@@ -540,43 +584,33 @@ def get_risk_history(customer_id: int | None = None) -> list[dict]:
         conn.close()
 
 
-def save_call_facts(
-    call_id: int,
-    facts: dict | None = None,
-    *,
-    summary: str | None = None,
-    sentiment_score: float | None = None,
-    sentiment_label: str | None = None,
-    risk_signal: str | None = None,
-    topics: list | None = None,
+def upsert_risk_snapshot(
+    customer_id: int,
+    assessed_date: str,
+    risk_appetite: str,
+    risk_score: float | None = None,
+    source: str | None = None,
+    note: str | None = None,
 ) -> None:
-    """Persist the extraction layer's structured facts onto a call row.
+    """Insert (or replace) one risk-profile snapshot, completing the chartable series.
 
-    Writes the full `facts` object to facts_json plus the derived trend columns
-    (summary/sentiment/risk_signal/topics). Only provided fields are written;
-    existing values are kept otherwise (COALESCE). `facts` and `topics` are
-    JSON-serialized. Raises DataLayerError if the call row does not exist.
+    Idempotent on (customer_id, assessed_date): any existing row for that date is
+    removed first, so re-running the pipeline never duplicates the pipeline-inferred
+    point at t. This is how the inferred last-call risk becomes part of the canonical
+    risk_profile_history series that retrieval reads.
     """
     conn = _get_sqlite_connection()
     try:
-        facts_json = json.dumps(facts) if facts is not None else None
-        topics_json = json.dumps(topics) if topics is not None else None
-        cursor = conn.execute(
-            """
-            UPDATE calls SET
-                facts_json      = COALESCE(?, facts_json),
-                summary         = COALESCE(?, summary),
-                sentiment_score = COALESCE(?, sentiment_score),
-                sentiment_label = COALESCE(?, sentiment_label),
-                risk_signal     = COALESCE(?, risk_signal),
-                topics          = COALESCE(?, topics)
-            WHERE id = ?
-            """,
-            [facts_json, summary, sentiment_score, sentiment_label,
-             risk_signal, topics_json, int(call_id)],
+        conn.execute(
+            "DELETE FROM risk_profile_history WHERE customer_id = ? AND assessed_date = ?",
+            [int(customer_id), assessed_date],
         )
-        if cursor.rowcount == 0:
-            raise DataLayerError(f"No call with id {call_id} to update")
+        conn.execute(
+            """INSERT INTO risk_profile_history
+               (customer_id, assessed_date, risk_appetite, risk_score, source, note)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            [int(customer_id), assessed_date, risk_appetite, risk_score, source, note],
+        )
         conn.commit()
     except sqlite3.OperationalError as e:
         raise DataLayerError(f"SQLite database unavailable: {e}")

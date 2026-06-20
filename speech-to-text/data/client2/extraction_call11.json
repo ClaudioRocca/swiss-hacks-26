@@ -1,0 +1,426 @@
+{
+  "summary": "The client, now a grandfather, is increasingly focused on stability and legacy, expressing concern about market volatility and tech concentration. He requests a gold hedge, a reduction in technology holdings, and a full assessment of his passion assets as part of his portfolio. He also highlights the importance of estate planning for his family and expresses some disappointment with Julius Baer's past communication during volatile periods.",
+  "sentiment": {
+    "overall_label": "neutral",
+    "overall_score": -0.3,
+    "emotional_significance": {
+      "significant": true,
+      "reasons": [
+        "market anxiety",
+        "legacy/mortality reflection",
+        "relationship grievance (bank communication)"
+      ],
+      "dominant_emotions": [
+        "anxiety",
+        "reflection"
+      ]
+    },
+    "trajectory": {
+      "start": "neutral",
+      "end": "neutral",
+      "note": "The call began with personal updates and reflection, moved through anxiety about markets and legacy, and ended with reassurance from the RM and concrete next steps, but unresolved concerns about past bank communication and market uncertainty remain."
+    },
+    "mood_timeline": [
+      {
+        "position": 0.05,
+        "fact": "Becoming a grandfather has shifted his priorities toward legacy.",
+        "reaction": "neutral",
+        "intensity": "medium",
+        "category": "personal",
+        "related_holdings": [],
+        "quote": "A grandfather now, if you can believe it. Little Emma arrived in April. It changes how you look at everything, Thomas. You start thinking less about the next quarter and more about the next generation."
+      },
+      {
+        "position": 0.1,
+        "fact": "Reflecting on health and loss of a friend.",
+        "reaction": "concern",
+        "intensity": "medium",
+        "category": "personal",
+        "related_holdings": [],
+        "quote": "The surgery went well, thank you. I'm slower than I was, but I'm well. Though I'll admit, between the operation and losing my old friend Heinrich in the spring, it's been a year that makes a man take stock."
+      },
+      {
+        "position": 0.2,
+        "fact": "Expressing anxiety about market volatility and macro uncertainty.",
+        "reaction": "concern",
+        "intensity": "high",
+        "category": "market",
+        "related_holdings": [],
+        "quote": "I watch the news and it's gold swinging around four thousand, energy prices jumping, all this noise about the new Fed chair. Honestly, it unsettles me more than it used to."
+      },
+      {
+        "position": 0.3,
+        "fact": "Desire for capital preservation and sleep-at-night stability.",
+        "reaction": "concern",
+        "intensity": "high",
+        "category": "market",
+        "related_holdings": [],
+        "quote": "I want to sleep at night, frankly. I keep coming back to the idea of holding a little gold as a hedge - not to make money, just so I'm not so exposed if things turn. Is that foolish?"
+      },
+      {
+        "position": 0.4,
+        "fact": "Worry about tech concentration (AAPL, MSFT, ASML).",
+        "reaction": "concern",
+        "intensity": "high",
+        "category": "market",
+        "related_holdings": [
+          "AAPL",
+          "MSFT",
+          "ASML"
+        ],
+        "quote": "The technology names. Apple, Microsoft, the Dutch chip company. They've been wonderful to me, but they're now such a large part of the pot. It worries me. If one of them stumbled I'd feel it badly."
+      },
+      {
+        "position": 0.5,
+        "fact": "Expressing preference for stability and legacy over growth.",
+        "reaction": "neutral",
+        "intensity": "medium",
+        "category": "personal",
+        "related_holdings": [],
+        "quote": "I'm not chasing the last few percent anymore. Stability matters more to me now than growth - I'd rather protect what Emma and Sophie will one day inherit than gamble it."
+      },
+      {
+        "position": 0.6,
+        "fact": "Interest in understanding passion assets as investments.",
+        "reaction": "excitement",
+        "intensity": "medium",
+        "category": "personal",
+        "related_holdings": [],
+        "quote": "I've always thought of them as my private passions, not as money. But with everything uncertain, I find myself wondering whether they're actually real investments I should be managing properly."
+      },
+      {
+        "position": 0.7,
+        "fact": "Seeking uncorrelated, stable assets (passion assets as ballast).",
+        "reaction": "excitement",
+        "intensity": "medium",
+        "category": "market",
+        "related_holdings": [],
+        "quote": "If they're genuinely uncorrelated with my equities, then perhaps they're part of the stability I've been searching for - not just things I love, but ballast."
+      },
+      {
+        "position": 0.8,
+        "fact": "Disappointment with Julius Baer's communication during volatility.",
+        "reaction": "concern",
+        "intensity": "medium",
+        "category": "julius_baer",
+        "related_holdings": [],
+        "quote": "I'll be honest with you, Thomas - I was a little disappointed the bank never raised any of this with me. During the worst of the volatility last autumn, I didn't hear from anyone for weeks."
+      },
+      {
+        "position": 0.95,
+        "fact": "Expressing trust in the RM and desire for estate planning.",
+        "reaction": "neutral",
+        "intensity": "medium",
+        "category": "personal",
+        "related_holdings": [],
+        "quote": "Getting it right for Sophie and Emma is the thing that matters most to me now."
+      }
+    ]
+  },
+  "risk": {
+    "declared_risk_appetite": "moderate",
+    "inferred_risk_appetite": "conservative",
+    "inferred_risk_score": 4.2,
+    "kyc_drift": "decreasing",
+    "drift_signals": [
+      {
+        "signal": "preservation / defensive language",
+        "quote": "I want to sleep at night, frankly."
+      },
+      {
+        "signal": "hedging or downside protection",
+        "quote": "I keep coming back to the idea of holding a little gold as a hedge - not to make money, just so I'm not so exposed if things turn."
+      },
+      {
+        "signal": "anxiety about losses, drawdowns, or uncertainty",
+        "quote": "Honestly, it unsettles me more than it used to."
+      },
+      {
+        "signal": "demand for uncorrelated, low-volatility, stable, or liquid assets",
+        "quote": "If they're genuinely uncorrelated with my equities, then perhaps they're part of the stability I've been searching for - not just things I love, but ballast."
+      },
+      {
+        "signal": "de-risking requests or reducing exposure",
+        "quote": "I'd be open to trimming some of that concentration and rotating into something steadier"
+      },
+      {
+        "signal": "life-stage cues (ageing, legacy, slowing down)",
+        "quote": "You start thinking less about the next quarter and more about the next generation."
+      },
+      {
+        "signal": "life-stage cues (ageing, legacy, slowing down)",
+        "quote": "I'm slower than I was, but I'm well. Though I'll admit, between the operation and losing my old friend Heinrich in the spring, it's been a year that makes a man take stock."
+      },
+      {
+        "signal": "preservation / defensive language",
+        "quote": "Stability matters more to me now than growth - I'd rather protect what Emma and Sophie will one day inherit than gamble it."
+      }
+    ],
+    "drift_explanation": "The client repeatedly expresses a desire for stability, capital preservation, and downside protection, citing both market anxiety and personal life-stage changes (becoming a grandfather, health issues, loss of a friend). He requests a gold hedge, wants to reduce tech exposure, and is focused on legacy and estate planning. These are clear signals of a shift toward a more conservative risk appetite, consistent with the recent downward trend in his risk score.",
+    "shift_from_onboarding": {
+      "onboarding_score": 6.0,
+      "onboarding_date": "2024-06-19",
+      "current_inferred_score": 4.2,
+      "delta": -1.8,
+      "direction": "more conservative"
+    }
+  },
+  "important_facts": [
+    {
+      "fact": "Client wants to add a modest gold allocation as a hedge for stability.",
+      "category": "market",
+      "priority": "high",
+      "related_holdings": []
+    },
+    {
+      "fact": "Client is concerned about high concentration in technology holdings (AAPL, MSFT, ASML) and wants to reduce exposure.",
+      "category": "market",
+      "priority": "high",
+      "related_holdings": [
+        "AAPL",
+        "MSFT",
+        "ASML"
+      ]
+    },
+    {
+      "fact": "Client wants to focus on stability and legacy, prioritizing capital preservation over growth.",
+      "category": "personal",
+      "priority": "high",
+      "related_holdings": []
+    },
+    {
+      "fact": "Client requests a full assessment of his passion assets (art, wine, watches, car) as part of his portfolio, focusing on liquidity, value, and correlation.",
+      "category": "personal",
+      "priority": "medium",
+      "related_holdings": []
+    },
+    {
+      "fact": "Client wants to maintain ESG/sustainable investment preferences.",
+      "category": "personal",
+      "priority": "medium",
+      "related_holdings": []
+    },
+    {
+      "fact": "Client expresses disappointment with Julius Baer's communication during past volatility.",
+      "category": "julius_baer",
+      "priority": "medium",
+      "related_holdings": []
+    },
+    {
+      "fact": "Client wants to revisit estate and succession planning, especially for Sophie and Emma.",
+      "category": "personal",
+      "priority": "high",
+      "related_holdings": []
+    }
+  ],
+  "inferred_insights": [
+    {
+      "insight": "The client is undergoing a legacy and mortality-driven reframing of his financial priorities, shifting from growth to preservation and intergenerational planning.",
+      "category": "personal",
+      "supporting_quotes": [
+        "A grandfather now, if you can believe it. Little Emma arrived in April. It changes how you look at everything, Thomas. You start thinking less about the next quarter and more about the next generation.",
+        "I'm slower than I was, but I'm well. Though I'll admit, between the operation and losing my old friend Heinrich in the spring, it's been a year that makes a man take stock.",
+        "Stability matters more to me now than growth - I'd rather protect what Emma and Sophie will one day inherit than gamble it.",
+        "Getting it right for Sophie and Emma is the thing that matters most to me now."
+      ],
+      "confidence": "high"
+    }
+  ],
+  "action_items": [
+    {
+      "action": "Prepare a proposal for a modest gold allocation as a portfolio hedge.",
+      "urgency": "high",
+      "based_on": "Client wants to add a modest gold allocation as a hedge for stability."
+    },
+    {
+      "action": "Develop a plan to reduce technology holdings (AAPL, MSFT, ASML) and rotate into steadier Swiss names.",
+      "urgency": "high",
+      "based_on": "Client is concerned about high concentration in technology holdings (AAPL, MSFT, ASML) and wants to reduce exposure."
+    },
+    {
+      "action": "Conduct a full assessment of the client's passion assets (art, wine, watches, car) including valuation, liquidity, transaction costs, and correlation with equities.",
+      "urgency": "medium",
+      "based_on": "Client requests a full assessment of his passion assets (art, wine, watches, car) as part of his portfolio, focusing on liquidity, value, and correlation."
+    },
+    {
+      "action": "Ensure ESG/sustainable investment preferences are maintained in any portfolio adjustments.",
+      "urgency": "medium",
+      "based_on": "Client wants to maintain ESG/sustainable investment preferences."
+    },
+    {
+      "action": "Arrange a review of estate and succession planning, with a focus on Sophie and Emma.",
+      "urgency": "high",
+      "based_on": "Client wants to revisit estate and succession planning, especially for Sophie and Emma."
+    },
+    {
+      "action": "Address the client's disappointment with past communication lapses and ensure proactive contact during future volatility.",
+      "urgency": "medium",
+      "based_on": "Client expresses disappointment with Julius Baer's communication during past volatility."
+    }
+  ],
+  "rm_proposals": [
+    {
+      "proposal": "Prepare a modest gold hedge sized to the client's portfolio.",
+      "financial_topics": [
+        "gold",
+        "portfolio hedging"
+      ]
+    },
+    {
+      "proposal": "Develop a plan to gently reduce technology concentration and increase allocation to quality Swiss names.",
+      "financial_topics": [
+        "technology stocks",
+        "portfolio concentration",
+        "Swiss equities"
+      ]
+    },
+    {
+      "proposal": "Prepare a full assessment of the client's collection (art, wine, watches, car) as a genuine asset class, including market size, historical returns, transaction costs, and correlation with Swiss and US holdings.",
+      "financial_topics": [
+        "passion assets",
+        "art",
+        "wine",
+        "watches",
+        "collectible cars",
+        "real assets",
+        "correlation"
+      ]
+    },
+    {
+      "proposal": "Revisit estate and succession planning in light of new family circumstances.",
+      "financial_topics": [
+        "estate planning",
+        "succession"
+      ]
+    }
+  ],
+  "financial_topics": [
+    "gold",
+    "portfolio hedging",
+    "technology stocks",
+    "portfolio concentration",
+    "Swiss equities",
+    "ESG",
+    "passion assets",
+    "art",
+    "wine",
+    "watches",
+    "collectible cars",
+    "real assets",
+    "correlation",
+    "estate planning",
+    "succession"
+  ],
+  "relevant_market_news": [
+    {
+      "topic": "gold",
+      "document": "Despite the recent pullback, structural demand for gold remains intact, driven by central-bank buying and persistent geopolitical uncertainty. Analysts see the $4,000 level as a key support zone.",
+      "metadata": {
+        "source": "Bloomberg",
+        "category": "commodities",
+        "published_date": "2026-06-15",
+        "tickers_mentioned": ""
+      },
+      "similarity_score": 0.5092
+    },
+    {
+      "topic": "gold",
+      "document": "Gold is trading around $4,100 per ounce after a sharp correction from earlier highs near $5,000. A stronger dollar and elevated Treasury yields have weighed on the metal, while investors weigh it as a hedge amid geopolitical stress.",
+      "metadata": {
+        "source": "Reuters",
+        "category": "commodities",
+        "published_date": "2026-06-18",
+        "tickers_mentioned": ""
+      },
+      "similarity_score": 0.4896
+    },
+    {
+      "topic": "portfolio hedging",
+      "document": "Fine art, rare wine, classic cars and luxury watches are increasingly treated as part of a real-assets strategy for diversification and long-term appreciation. They act as inflation hedges and stores of value, but carry valuation challenges, illiquidity, and require specialized knowledge and authenticity verification.",
+      "metadata": {
+        "source": "Knight Frank",
+        "category": "alternatives",
+        "published_date": "2026-06-10",
+        "tickers_mentioned": ""
+      },
+      "similarity_score": 0.4213
+    },
+    {
+      "topic": "portfolio concentration",
+      "document": "Fine wine has risen more than 37% over ten years and is attracting ultra-high-net-worth investors, with over a third already active owners per global surveys. The market is tracked in real time by Liv-ex, offering institutional-grade price indices and trading data.",
+      "metadata": {
+        "source": "Liv-ex",
+        "category": "alternatives",
+        "published_date": "2026-06-09",
+        "tickers_mentioned": ""
+      },
+      "similarity_score": 0.4324
+    },
+    {
+      "topic": "Swiss equities",
+      "document": "Prime Swiss real estate around Zurich and Geneva's lakefront remains resilient as investors seek stability. Luxury residential prices are holding firm, while peripheral commercial space sees softer demand.",
+      "metadata": {
+        "source": "Credit Suisse Research",
+        "category": "real_estate",
+        "published_date": "2026-06-14",
+        "tickers_mentioned": ""
+      },
+      "similarity_score": 0.5216
+    },
+    {
+      "topic": "Swiss equities",
+      "document": "Swiss ESG funds continue to attract inflows, with sustainable strategies now a large share of total fund assets. Technology and healthcare remain the most popular ESG-screened sectors.",
+      "metadata": {
+        "source": "SIX Swiss Exchange",
+        "category": "macro",
+        "published_date": "2026-06-11",
+        "tickers_mentioned": ""
+      },
+      "similarity_score": 0.4931
+    },
+    {
+      "topic": "passion assets",
+      "document": "Despite strong headline returns, art carries high transaction costs (often 20-25%), opaque pricing, and authenticity risk. Valuations depend heavily on provenance and usually require expert advisory or art funds. It suits long horizons and should remain a measured share of total wealth.",
+      "metadata": {
+        "source": "Barron's",
+        "category": "alternatives",
+        "published_date": "2026-06-04",
+        "tickers_mentioned": ""
+      },
+      "similarity_score": 0.4978
+    },
+    {
+      "topic": "wine",
+      "document": "A recent correction in fine wine prices has created more attractive entry levels for long-term buyers. Bordeaux's classification dates to 1855 and the secondary market spans generations, but liquidity depends on auction houses and collector networks.",
+      "metadata": {
+        "source": "Liv-ex",
+        "category": "alternatives",
+        "published_date": "2026-06-02",
+        "tickers_mentioned": ""
+      },
+      "similarity_score": 0.5145
+    },
+    {
+      "topic": "watches",
+      "document": "Luxury watches have appreciated around 125% over ten years, the strongest gain among tracked luxury categories. Vintage Patek Philippe, Rolex and Audemars Piguet pieces drive much of the demand, though condition, rarity and provenance are decisive for value.",
+      "metadata": {
+        "source": "Knight Frank",
+        "category": "alternatives",
+        "published_date": "2026-06-06",
+        "tickers_mentioned": ""
+      },
+      "similarity_score": 0.5117
+    },
+    {
+      "topic": "collectible cars",
+      "document": "Unlike public markets, collectible assets trade thinly and depend on a limited pool of buyers. Auction houses such as Sotheby's and Christie's set reference valuations, but pricing remains opaque. Advisors typically recommend keeping such holdings a small share of total wealth.",
+      "metadata": {
+        "source": "Barron's",
+        "category": "alternatives",
+        "published_date": "2026-06-05",
+        "tickers_mentioned": ""
+      },
+      "similarity_score": 0.5764
+    }
+  ]
+}

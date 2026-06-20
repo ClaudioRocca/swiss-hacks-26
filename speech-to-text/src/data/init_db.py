@@ -15,8 +15,8 @@ from pathlib import Path
 import httpx
 from dotenv import load_dotenv
 
-# Load .env from project root (two levels up from this file)
-_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+# Load .env from the speech-to-text dir (three levels up from this file)
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 load_dotenv(_PROJECT_ROOT / ".env")
 
 import chromadb
@@ -364,8 +364,8 @@ def _init_chromadb(openai_client: OpenAI) -> int:
     # Drop existing collection if it exists
     try:
         client.delete_collection(name=_COLLECTION_NAME)
-    except ValueError:
-        pass  # Collection doesn't exist
+    except Exception:
+        pass  # Collection doesn't exist (raise type varies across chromadb versions)
 
     # Create fresh collection
     collection = client.create_collection(
