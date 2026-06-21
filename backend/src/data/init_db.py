@@ -179,12 +179,16 @@ NEWS_ARTICLES = [
         "metadata": {"source": "Bloomberg", "category": "equity", "published_date": "2025-05-18", "tickers_mentioned": "NVDA"},
     },
     {
+        "text": "Nvidia stock surges as Wall Street raises price targets following blowout earnings. The semiconductor giant's AI chip dominance shows no signs of slowing, with CEO Jensen Huang saying demand for Nvidia GPUs far exceeds supply. Analysts see the stock reaching $180 by year-end.",
+        "metadata": {"source": "CNBC", "category": "equity", "published_date": "2025-05-23", "tickers_mentioned": "NVDA"},
+    },
+    {
         "text": "Geopolitical tensions in the South China Sea escalate as naval exercises intensify. Swiss defense stocks and gold ETFs see inflows as investors seek safe-haven assets. The Swiss franc strengthened 0.8% against the euro on risk-off sentiment.",
         "metadata": {"source": "Reuters", "category": "geopolitical", "published_date": "2025-05-17", "tickers_mentioned": ""},
     },
     {
         "text": "Roche's new Alzheimer's drug receives FDA breakthrough therapy designation. Phase 3 trial data showed 35% reduction in cognitive decline. The Basel company's shares surged 4% on the news, outperforming the broader SPI index.",
-        "metadata": {"source": "Financial Times", "category": "equity", "published_date": "2025-05-16", "tickers_mentioned": "ROP"},
+        "metadata": {"source": "Financial Times", "category": "equity", "published_date": "2025-05-16", "tickers_mentioned": "ROG"},
     },
     {
         "text": "Swiss ESG funds see record inflows of CHF 8 billion in Q1 2025. Sustainable investing now represents 42% of total Swiss fund assets under management. Technology and healthcare remain the most popular ESG-screened sectors.",

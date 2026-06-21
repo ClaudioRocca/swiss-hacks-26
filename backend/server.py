@@ -146,7 +146,7 @@ def _execute_query(source: str, planned_filters: dict) -> dict:
 # WebSocket pipeline
 # ---------------------------------------------------------------------------
 
-DEFAULT_TEXT_FILE = "client_calls/call_8_demo_readback.txt"
+DEFAULT_TEXT_FILE = "client_calls/call_9_demo_readback.txt"
 
 # The mock data layer is anchored to late May 2025 (latest trade 2025-05-20,
 # market movements 2025-05-26, news up to 2025-05-23). Pin the agent's "today"
@@ -244,8 +244,8 @@ async def websocket_pipeline(ws: WebSocket):
         else:
             # Text mode: read the script, stream utterances through segmenter
             text = resolved.read_text()
-            # ~0.08s/word ≈ 750 wpm — fast iteration mode
-            await run_text(text, on_trigger=on_trigger, on_final=on_final, now=DEMO_NOW, pace=0.08)
+            # ~0.05s/word — fast demo mode
+            await run_text(text, on_trigger=on_trigger, on_final=on_final, now=DEMO_NOW, pace=0.05)
 
         await ws.send_json({"type": "done"})
 

@@ -1,46 +1,58 @@
 Client: Dr. Maximilian Keller
 Relationship Manager: Sofia Lambro
-Call type: portfolio review + market/news check (two-way)
+Call type: portfolio review — RM reads the surfaced data back to the client (demo)
 ---
 
-RM: Good morning, Dr. Keller. Thank you for making the time. How can I help you today?
+RM: Good morning, Dr. Keller. Always a pleasure.
 
-Client: Morning, Sofia. Let's start with my UBS position. I saw the headlines that UBS just completed the final integration phase of the Credit Suisse wealth management operations, and I want to understand what that means for my holding.
+Client: Morning, Sofia! Forgive the slightly croaky voice — Ingrid and I have just got back from a few days walking in the Engadin, marvellous air up there. Right, down to business: let's begin with my technology holdings. Show me where my technology positions stand.
 
-RM: Absolutely. Let me pull that up for you right now.
+RM: Of course, pulling up your technology book now.
 
-Client: Could you tell me the current unrealized profit or loss on my UBS position? And while you're at it, please review the trades we executed on UBS over the last couple of weeks. I believe we did a couple of buy operations recently and I want to confirm the exact amounts.
+RM: You hold three technology names: 500 Apple at USD 198.30, up USD 27,900; 300 Microsoft at USD 430.50, up USD 45,150; and 400 NVIDIA at USD 145, up USD 20,000.
 
-RM: Of course. I'm looking at your UBS holding and the recent trade history as we speak.
+Client: Microsoft has been awfully good to me. Is there any fresh news on Microsoft, especially the cloud side of things?
 
-Client: Also, can you find me the latest news on UBS and the Credit Suisse integration so I can read the details myself?
+RM: Let me pull the latest coverage.
 
-RM: Done. I've surfaced the most relevant articles on the integration. You'll be able to open the full text on your end.
+RM: Bloomberg reports Microsoft Azure posted 45 percent revenue growth driven by enterprise AI adoption, and notes Swiss corporate clients are among the fastest adopters in Europe.
 
-Client: Perfect. Separately, I'd like to talk about my healthcare exposure. Novartis just reported stronger-than-expected first quarter results, and I've also been reading that Roche received an FDA breakthrough designation for its new Alzheimer's drug.
+Client: Splendid. And how did Apple and Microsoft move on the market today?
 
-RM: That's right, both have been in the news. Shall I pull the latest coverage on Novartis and Roche?
+RM: One moment, checking today's movements.
 
-Client: Yes, please. On top of that, show me how Novartis and Roche shares moved today in the market, and give me my overall position in the healthcare sector so I can see whether I'm overweight there.
+RM: Apple is up 2.16 percent today, while Microsoft is down 0.81 percent.
 
-RM: Understood. I'm checking today's price movements for both names and aggregating your healthcare sector exposure now.
+Client: Now, let's talk Nestlé. Remind me of the Nestlé trades we made over the past couple of weeks — I recall we did something rather clever with a short.
 
-Client: I'm trying to decide if I should trim or add. I don't want to be too concentrated.
+RM: Pulling your recent Nestlé activity.
 
-RM: That's a sensible concern. Once I have the numbers in front of us we can talk through whether a rebalance makes sense.
+RM: Three operations on Nestlé: a short-sell of 300 shares for CHF 29,550 on the 12th of May, a short-cover of 300 for CHF 32,340 on the 20th, and a buy of 200 for CHF 21,560 the same day.
 
-Client: One last thing, on the real estate side. I'm thinking about our commercial property strategy. Can you pull up my active commercial real estate investments, especially anything in Geneva, with a current value up to ten million?
+Client: Good memory, you. Is there any news on Nestlé driving things at the moment?
 
-RM: Certainly. Let me filter your active commercial holdings in the Geneva area.
+RM: Searching now.
 
-Client: I recall we hold a commercial building on Rue du Rhône and I want to review its current valuation.
+RM: The Financial Times reports Nestlé announced a CHF 3 billion share buyback amid activist investor pressure, divesting underperforming water brands while doubling down on health science and premium coffee.
 
-RM: I see it here. I'll bring up the latest valuation for that property.
+Client: Fascinating. Let's turn to Zurich Insurance — what's my position there, and how did it move today?
 
-Client: And finally, given all the talk about chip supply, could you check the latest news on ASML and the semiconductor backlog? If the technology outlook looks strong I might want to rotate some capital that way before the weekend.
+RM: Certainly, bringing up your Zurich Insurance position and today's move.
 
-RM: Good idea. I'll find the most recent ASML and semiconductor news so you can weigh that before we close out the week.
+RM: You hold 600 shares of Zurich Insurance at CHF 478.60, an unrealized gain of CHF 17,040. Today it is down 1.12 percent.
 
-Client: Thank you, Sofia. That covers everything for now.
+Client: And is there anything in the news on Zurich Insurance?
 
-RM: My pleasure, Dr. Keller. I'll send a written summary right after the call.
+RM: Let me have a look.
+
+RM: Bloomberg reports Zurich Insurance posted a record first-half operating profit of USD 4.2 billion and raised its dividend outlook for 2025.
+
+Client: Very reassuring. One last thing before I let you go, Sofia — the homes. Pull up my active residential properties for me.
+
+RM: Filtering your active residential holdings now.
+
+RM: You hold two active residential properties: the apartment in Zurich Seefeld, valued at CHF 4.8 million, and the place in Lugano Paradiso, at CHF 2.2 million.
+
+Client: Wonderful — thank you so much, Sofia, that's everything for today. Do give my best to the team.
+
+RM: Always a pleasure, Dr. Keller. I'll send the written summary across shortly.

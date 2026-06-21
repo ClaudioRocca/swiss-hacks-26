@@ -1,58 +1,56 @@
 Client: Dr. Maximilian Keller
 Relationship Manager: Sofia Lambro
-Call type: portfolio review — RM reads the surfaced data back to the client (demo)
+Call type: portfolio review — client-initiated, concern-driven (with RM data readback)
 ---
 
-RM: Good morning, Dr. Keller. Always a pleasure.
+Client: Sofia, hello. I hope I'm not catching you at a bad time. I've been reading the news this morning and honestly I'm a bit unsettled.
 
-Client: Morning, Sofia! Forgive the slightly croaky voice — Ingrid and I have just got back from a few days walking in the Engadin, marvellous air up there. Right, down to business: let's begin with my technology holdings. Show me where my technology positions stand.
+RM: Not at all, Dr. Keller. I'm here for you. What's on your mind?
 
-RM: Of course, pulling up your technology book now.
+Client: It's UBS. I saw the headlines about them completing the Credit Suisse integration, and I know we added to the position recently. But there's so much noise — people are saying the merged entity is too big, there's regulatory pressure. I just want to know where we stand.
 
-RM: You hold three technology names: 500 Apple at USD 198.30, up USD 27,900; 300 Microsoft at USD 430.50, up USD 45,150; and 400 NVIDIA at USD 145, up USD 20,000.
+RM: I can see your UBS position right here. You hold two thousand shares of UBSG, currently at twenty-eight forty per share. That puts your unrealized gain at around seven thousand one hundred Swiss francs — so the position is comfortably in profit. I also see that NZZ just published a piece confirming UBS completed the final integration phase of the Credit Suisse wealth management operations, with the merged entity now managing over five trillion in invested assets.
 
-Client: Microsoft has been awfully good to me. Is there any fresh news on Microsoft, especially the cloud side of things?
+Client: Good to hear we're in the green. But remind me — didn't we buy more recently? I want to confirm what we added and at what cost.
 
-RM: Let me pull the latest coverage.
+RM: Yes, we did. I can see two recent buy operations on UBSG — one for fourteen thousand one hundred seventy-five francs and another for nine thousand nine hundred twenty. So we've been building the position over the last couple of weeks at these levels.
 
-RM: Bloomberg reports Microsoft Azure posted 45 percent revenue growth driven by enterprise AI adoption, and notes Swiss corporate clients are among the fastest adopters in Europe.
+Client: Alright, that's reassuring. But honestly Sofia, the more I think about it, the more uneasy I feel. The world feels less predictable than it used to — the geopolitical tensions, the rate uncertainty, all of it. I'm starting to think I should be more defensive with this portfolio.
 
-Client: Splendid. And how did Apple and Microsoft move on the market today?
+RM: I understand. It sounds like your appetite for risk might be shifting a bit. That's perfectly natural given the environment.
 
-RM: One moment, checking today's movements.
+Client: Exactly. I used to be comfortable with a moderate profile, but lately I find myself wanting more certainty, more capital preservation. I'd rather give up some upside and sleep better at night.
 
-RM: Apple is up 2.16 percent today, while Microsoft is down 0.81 percent.
+RM: That's an important signal and something we should document properly. We can revisit your risk profile formally if you'd like. In the meantime, let's look at the positions and see where we might want to de-risk.
 
-Client: Now, let's talk Nestlé. Remind me of the Nestlé trades we made over the past couple of weeks — I recall we did something rather clever with a short.
+Client: Yes, let's do that. Let me switch gears for a moment. Novartis reported earnings recently, didn't they? I remember you mentioning it might be strong.
 
-RM: Pulling your recent Nestlé activity.
+RM: Indeed they did. Bloomberg reports that Novartis posted stronger-than-expected first quarter results with core operating income up fifteen percent, and they raised full-year guidance on the back of strong demand in oncology and immunology. I see the stock pulled back slightly today — down about one point seven percent — but that's likely profit-taking after the run-up.
 
-RM: Three operations on Nestlé: a short-sell of 300 shares for CHF 29,550 on the 12th of May, a short-cover of 300 for CHF 32,340 on the 20th, and a buy of 200 for CHF 21,560 the same day.
+Client: Good. And Roche too while you're at it — between Novartis and Roche, I sometimes lose track of which one I own more of. Healthcare feels like one of the safer parts of my portfolio, at least defensively.
 
-Client: Good memory, you. Is there any news on Nestlé driving things at the moment?
+RM: Let me check. You own eight hundred shares of Novartis at ninety-one fifty, with a gain of about seventy-three hundred francs, and three hundred fifty shares of Roche at two fifty-eight ninety, up around forty-six hundred. So healthcare is a meaningful allocation — and you're right, it tends to be more defensive in nature.
 
-RM: Searching now.
+Client: That's what I like about it. Predictable earnings, aging population driving demand. I'd honestly feel more comfortable if we tilted more in that direction rather than staying so heavy in financials and tech.
 
-RM: The Financial Times reports Nestlé announced a CHF 3 billion share buyback amid activist investor pressure, divesting underperforming water brands while doubling down on health science and premium coffee.
+RM: Noted. That's consistent with a more conservative posture — favoring defensive sectors with visible cash flows over cyclicals.
 
-Client: Fascinating. Let's turn to Zurich Insurance — what's my position there, and how did it move today?
+Client: Exactly. On a different note — do you remember the commercial property in Geneva, the one on Rue du Rhône? I received an informal offer last week from a developer group. I haven't responded yet, but I want to know what we have it valued at currently before I even consider a conversation.
 
-RM: Certainly, bringing up your Zurich Insurance position and today's move.
+RM: I've pulled that up. Your commercial property on Rue du Rhône in Geneva is currently valued at eight point five million francs. The status is active. You acquired it for seven point two million, so that's an appreciation of about one point three million since purchase.
 
-RM: You hold 600 shares of Zurich Insurance at CHF 478.60, an unrealized gain of CHF 17,040. Today it is down 1.12 percent.
+Client: That's better than I thought. If the offer is anywhere near that range, it might be worth a conversation. Real estate feels more tangible to me than equities right now — but if someone wants to pay a premium, I'd rather hold cash or move into something lower-risk.
 
-Client: And is there anything in the news on Zurich Insurance?
+RM: Understood. That's a prudent approach. We could reinvest proceeds into shorter-duration instruments or defensive positions if you decide to sell.
 
-RM: Let me have a look.
+Client: One last thing — my son keeps telling me about Nvidia. He's very excited about the AI story. I know we have a small position already, but honestly, I'm not sure I want to add more right now. It feels speculative given how I'm feeling about risk.
 
-RM: Bloomberg reports Zurich Insurance posted a record first-half operating profit of USD 4.2 billion and raised its dividend outlook for 2025.
+RM: You do have a position in Nvidia — four hundred shares bought at ninety-five, now at one forty-five, so that's up nicely. In terms of news, Bloomberg reported record data-center GPU demand with quarterly revenue up seventy-eight percent year over year, and Blackwell GPUs sold out through the end of twenty-five. The momentum is clearly there.
 
-Client: Very reassuring. One last thing before I let you go, Sofia — the homes. Pull up my active residential properties for me.
+Client: I appreciate the data, but I think I'll hold what we have rather than add. If anything, I'd rather trim it if we need to fund something more conservative. I just don't have the stomach for high-growth volatility right now.
 
-RM: Filtering your active residential holdings now.
+RM: That makes complete sense and it's consistent with what you've been expressing throughout our conversation. We'll preserve the position as-is for now and keep it on watch.
 
-RM: You hold two active residential properties: the apartment in Zurich Seefeld, valued at CHF 4.8 million, and the place in Lugano Paradiso, at CHF 2.2 million.
+Client: Thank you, Sofia. I feel better having talked this through. I know I'm being more cautious than usual, but that's where my head is right now.
 
-Client: Wonderful — thank you so much, Sofia, that's everything for today. Do give my best to the team.
-
-RM: Always a pleasure, Dr. Keller. I'll send the written summary across shortly.
+RM: There's nothing wrong with that at all. Protecting what you've built is just as important as growing it. I'll send you a written summary and we can schedule a formal risk profile review next week. Have a good day, Dr. Keller.
